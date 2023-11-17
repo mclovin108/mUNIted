@@ -1,12 +1,67 @@
 import 'package:flutter/material.dart';
 import '../../constants.dart';
+import '../../Backend/backend.dart';
+import 'package:http/http.dart' as http;
 
 
-class SignupPage extends StatelessWidget {
-  const SignupPage({super.key});
+
+class SignupPage extends StatefulWidget {
+
+  final Backend _backend;
+  final http.Client _client;
+
+  const SignupPage(this._backend, this._client);
+
+
+  @override
+  State<SignupPage> createState() => _SignupPageState();
+}
+
+
+class _SignupPageState extends State<SignupPage> {
+
+
+  // necessary for mocking (unit and widget tests)
+  late Backend _backend;    // library with functions to access backend
+  late http.Client _client; // REST client proxy
+
+  @override
+  void initState() {
+    super.initState();
+    _backend = widget._backend;
+    _client = widget._client;
+  }
+
+  
+
 
   @override
   Widget build(BuildContext context) {
+
+    TextEditingController usernameController = TextEditingController();
+    TextEditingController emailController = TextEditingController();
+    TextEditingController passwordController = TextEditingController();
+    TextEditingController confirmPasswordController = TextEditingController();
+
+    void genericErrorMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -41,58 +96,92 @@ class SignupPage extends StatelessWidget {
                 ),
                 Column(
                   children: <Widget>[
-                    TextField(
+                    TextFormField(
+                      controller: usernameController,
+                      keyboardType: TextInputType.text,
+                      maxLines: 1,
                       decoration: InputDecoration(
                           hintText: "Username",
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(18),
                               borderSide: BorderSide.none),
-                          fillColor: kPrimaryDarkColor,
+                          fillColor: kPrimaryColor,
                           filled: true,
                           prefixIcon: const Icon(Icons.person)),
+                      validator: (text) {
+                        if (text == null || text.isEmpty) {
+                          return 'Error: please enter username';
+                        }
+                        return null;
+                      }
                     ),
 
                     const SizedBox(height: 20),
 
-                    TextField(
+                    TextFormField(
+                      controller: emailController,
+                      keyboardType: TextInputType.text,
+                      maxLines: 1,
                       decoration: InputDecoration(
                           hintText: "Email",
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(18),
                               borderSide: BorderSide.none),
-                          fillColor: kPrimaryDarkColor,
+                          fillColor: kPrimaryColor,
                           filled: true,
-                          prefixIcon: const Icon(Icons.email)),
+                          prefixIcon: const Icon(Icons.person)),
+                      validator: (text) {
+                        if (text == null || text.isEmpty) {
+                          return 'Error: please enter E-Mail';
+                        }
+                        return null;
+                      }
                     ),
 
                     const SizedBox(height: 20),
 
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: "Password",
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(18),
-                            borderSide: BorderSide.none),
-                        fillColor: kPrimaryDarkColor,
-                        filled: true,
-                        prefixIcon: const Icon(Icons.password),
-                      ),
+                    TextFormField(
+                      controller: passwordController,
+                      keyboardType: TextInputType.text,
+                      maxLines: 1,
                       obscureText: true,
+                      decoration: InputDecoration(
+                          hintText: "Pasword",
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18),
+                              borderSide: BorderSide.none),
+                          fillColor: kPrimaryColor,
+                          filled: true,
+                          prefixIcon: const Icon(Icons.person)),
+                      validator: (text) {
+                        if (text == null || text.isEmpty) {
+                          return 'Error: please enter password';
+                        }
+                        return null;
+                      }
                     ),
 
                     const SizedBox(height: 20),
 
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: "Confirm Password",
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(18),
-                            borderSide: BorderSide.none),
-                        fillColor: kPrimaryDarkColor,
-                        filled: true,
-                        prefixIcon: const Icon(Icons.password),
-                      ),
+                    TextFormField(
+                      controller: confirmPasswordController,
+                      maxLines: 1,
                       obscureText: true,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                          hintText: "Confirm Password",
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18),
+                              borderSide: BorderSide.none),
+                          fillColor: kPrimaryColor,
+                          filled: true,
+                          prefixIcon: const Icon(Icons.person)),
+                      validator: (text) {
+                        if (text == null || text.isEmpty) {
+                          return 'Error: please confirm password';
+                        }
+                        return null;
+                      }
                     ),
                   ],
                 ),
@@ -101,6 +190,13 @@ class SignupPage extends StatelessWidget {
 
                     child: ElevatedButton(
                       onPressed: () {
+                        if (passwordController.text == confirmPasswordController.text) {
+                          _backend.createUser(_client, usernameController.text, emailController.text, passwordController.text, confirmPasswordController.text)
+                          .then((value) => Navigator.pop(context));
+                        } else {
+                          //show error password dont match
+                          genericErrorMessage("Passwords don't match!");
+                        }
                       },
                       child: const Text(
                         "Sign up",
@@ -109,7 +205,7 @@ class SignupPage extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         shape: const StadiumBorder(),
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: kPrimaryColor,
+                        backgroundColor: kPrimaryDarkColor,
                       ),
                     )
                 ),
@@ -121,7 +217,7 @@ class SignupPage extends StatelessWidget {
                     TextButton(
                         onPressed: () {
                         },
-                        child: const Text("Login", style: TextStyle(color: kPrimaryColor),)
+                        child: const Text("Login", style: TextStyle(color: kPrimaryDarkColor),)
                     )
                   ],
                 )
