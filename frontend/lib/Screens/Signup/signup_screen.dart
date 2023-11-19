@@ -129,7 +129,7 @@ class _SignupPageState extends State<SignupPage> {
                               borderSide: BorderSide.none),
                           fillColor: kPrimaryColor,
                           filled: true,
-                          prefixIcon: const Icon(Icons.person)),
+                          prefixIcon: const Icon(Icons.account_circle)),
                       validator: (text) {
                         if (text == null || text.isEmpty) {
                           return 'Error: please enter E-Mail';
@@ -146,13 +146,13 @@ class _SignupPageState extends State<SignupPage> {
                       maxLines: 1,
                       obscureText: true,
                       decoration: InputDecoration(
-                          hintText: "Pasword",
+                          hintText: "Password",
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(18),
                               borderSide: BorderSide.none),
                           fillColor: kPrimaryColor,
                           filled: true,
-                          prefixIcon: const Icon(Icons.person)),
+                          prefixIcon: const Icon(Icons.lock)),
                       validator: (text) {
                         if (text == null || text.isEmpty) {
                           return 'Error: please enter password';
@@ -175,7 +175,7 @@ class _SignupPageState extends State<SignupPage> {
                               borderSide: BorderSide.none),
                           fillColor: kPrimaryColor,
                           filled: true,
-                          prefixIcon: const Icon(Icons.person)),
+                          prefixIcon: const Icon(Icons.check_circle)),
                       validator: (text) {
                         if (text == null || text.isEmpty) {
                           return 'Error: please confirm password';

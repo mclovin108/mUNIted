@@ -58,6 +58,16 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _loginButtonPressed() async {
+
+    if (usernameController.text.isEmpty) {
+      genericErrorMessage("Please type in your username");
+      return;
+    }
+    if (passwordController.text.isEmpty) {
+      genericErrorMessage("Please type in your password");
+      return;
+    }
+
   bool isAuthenticated = await _backend.userIsAuthenticated(
     _client,
     usernameController.text,
@@ -139,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
                               borderSide: BorderSide.none),
                           fillColor: kPrimaryColor,
                           filled: true,
-                          prefixIcon: const Icon(Icons.person)),
+                          prefixIcon: const Icon(Icons.lock)),
                       validator: (text) {
                         if (text == null || text.isEmpty) {
                           return 'Error: please enter password';
@@ -177,7 +187,7 @@ class _LoginPageState extends State<LoginPage> {
                     const Text("Don't have an account yet?"),
                     TextButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, '/home');
+                          Navigator.pushNamed(context, '/signup');
                         },
                         child: const Text("Signup", style: TextStyle(color: kPrimaryDarkColor),)
                     )
