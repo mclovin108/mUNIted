@@ -216,6 +216,7 @@ class _SignupPageState extends State<SignupPage> {
                     const Text("Already have an account?"),
                     TextButton(
                         onPressed: () {
+                          Navigator.pushNamed(context, '/login');
                         },
                         child: const Text("Login", style: TextStyle(color: kPrimaryDarkColor),)
                     )
