@@ -44,8 +44,6 @@ class _SignupPageState extends State<SignupPage> {
     TextEditingController passwordController = TextEditingController();
     TextEditingController confirmPasswordController = TextEditingController();
 
-    String _errorMessage = "";
-
     void genericErrorMessage(String message) {
     showDialog(
       context: context,
@@ -235,11 +233,6 @@ class _SignupPageState extends State<SignupPage> {
                           backgroundColor: kPrimaryDarkColor,
                         ),
                       )
-                  ),
-
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(_errorMessage, style: TextStyle(color: Colors.red),),
                   ),
 
                   Row(
