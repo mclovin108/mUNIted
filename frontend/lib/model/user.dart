@@ -14,7 +14,7 @@ class User {
         required this.password,
     });
 
-    // parse Item from JSON-data
+    // parse User from JSON-data
     factory User.fromJson(Map<String, dynamic> json) => User(
         id: json["id"] as int,
         username: json["username"] as String,
@@ -22,7 +22,7 @@ class User {
         password: json["password"] as String,
     );
 
-    // map item to JSON-data (so far not used in app)
+    // map user to JSON-data (so far not used in app)
     Map<String, dynamic> toJson() => {
         "id": id,
         "username": username,
@@ -30,12 +30,3 @@ class User {
         "password": password,
     };
 }
-
-//List<Item> itemsFromJson(String str) => List<Item>.from(json.decode(str).map((x) => Item.fromJson(x)));
-
-//String itemsToJson(List<Item> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
-
-//Item itemFromJson(String str) => Item.fromJson(json.decode(str));
-
-//String itemToJson(Item data) => json.encode(data.toJson());
-
