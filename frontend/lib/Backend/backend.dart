@@ -66,4 +66,30 @@ class Backend {
     throw Exception('Failed to load user list');
   }
   }
+
+  Future<bool> userIsAuthenticated(http.Client client, String enteredUsername, String enteredPassword) async {
+  try {
+    // Access REST interface with a GET request to check if the username exists
+    var response = await client.get(Uri.parse('${_backend}users/$enteredUsername'));
+
+    // Check if the user with the specified username exists
+    if (response.statusCode == 200) {
+      // If the user exists, check if the entered password matches the stored one
+      var userData = json.decode(utf8.decode(response.bodyBytes));
+      String storedPassword = userData['password'];
+
+      return enteredPassword == storedPassword;
+    } else if (response.statusCode == 404) {
+      // User with the specified username does not exist
+      return false;
+    } else {
+      // Failed to check user authentication
+      return false;
+    }
+  } catch (e) {
+    // Handle exceptions, e.g., network errors
+    print('Error checking user authentication: $e');
+    return false;
+  }
+}
 }
