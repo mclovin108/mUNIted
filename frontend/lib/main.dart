@@ -1,125 +1,303 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
-  runApp(const MyApp());
+  try {
+    runApp(MyApp());
+  } catch (error, stackTrace) {
+    print('Error: $error');
+    print('Stack trace: $stackTrace');
+  }
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a blue toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      title: 'Sliding Login',
+      home: HomePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
+class HomePage extends StatefulWidget {
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  HomePageState createState() {
+    return HomePageState();
+  }
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+  bool isLogin = true;
+  late Animation<double> loginSize;
+  late AnimationController loginController;
+  late AnimatedOpacity opacityAnimation;
+  Duration animationDuration = Duration(milliseconds: 270);
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+
+    loginController = AnimationController(vsync: this, duration: animationDuration);
+
+    opacityAnimation = AnimatedOpacity(opacity: 0.0, duration: animationDuration);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    double _defaultLoginSize = MediaQuery.of(context).size.height / 1.6;
+
+    loginSize = Tween<double>(begin: _defaultLoginSize, end: 200).animate(
+      CurvedAnimation(parent: loginController, curve: Curves.linear),
+    );
+  }
+
+
+  @override
+  void dispose() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
+    loginController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildLoginWidgets() {
+    return Container(
+      padding: EdgeInsets.only(bottom: 62, top: 16),
+      width: MediaQuery.of(context).size.width,
+      height: loginSize.value,
+      decoration: BoxDecoration(
+          color: Color(0XFF2a3ed7),
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(190),
+              bottomRight: Radius.circular(190))),
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: AnimatedOpacity(
+          opacity: loginController.value,
+          duration: animationDuration,
+          child: GestureDetector(
+            onTap: isLogin ? null : () {
+              loginController.reverse();
+
+              setState(() {
+                isLogin = !isLogin;
+              });
+            },
+            child: Container(
+              child: Text(
+                'LOG IN'.toUpperCase(),
+                style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginComponents() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Visibility(
+          visible: isLogin,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 42, right: 42),
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  style: TextStyle(color: Colors.white, height: 0.5),
+                  decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.email),
+                      hintText: 'Email',
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(32))
+                      )
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: TextField(
+                    style: TextStyle(color: Colors.white, height: 0.5),
+                    decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.vpn_key),
+                        hintText: 'Password',
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                                Radius.circular(32)))),
+                  ),
+                ),
+                Container(
+                  width: 200,
+                  height: 40,
+                  margin: EdgeInsets.only(top: 32),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(50))
+                  ),
+                  child: Center(
+                    child: Text(
+                      'LOG IN',
+                      style: TextStyle(color: Color(0XFF2a3ed7),
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+
+      ],
+    );
+  }
+
+  Widget _buildRegistercomponents() {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 42,
+        right: 42,
+        top: 32,
+        bottom: 32
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(bottom: 32),
+            child: Text(
+              'Sign Up'.toUpperCase(),
+              style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0XFF2a3ed7)),
+            ),
+          ),
+          TextField(
+            style: TextStyle(color: Colors.black, height: 0.5),
+            decoration: InputDecoration(
+                prefixIcon: Icon(
+                  Icons.email,
+                ),
+                hintText: 'Email',
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(32)))),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16, top: 16),
+            child: TextField(
+              style: TextStyle(color: Colors.black, height: 0.5),
+              decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.vpn_key),
+                  hintText: 'Password',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(32)))),
+            ),
+          ),
+          TextField(
+            style: TextStyle(color: Colors.black, height: 0.5),
+            decoration: InputDecoration(
+                prefixIcon: Icon(Icons.vpn_key),
+                hintText: 'Confirm Password',
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(32)))),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 24),
+            child: Container(
+              width: 200,
+              height: 40,
+              margin: EdgeInsets.only(top: 32),
+              decoration: BoxDecoration(
+                  color: Color(0XFF2a3ed7),
+                  borderRadius: BorderRadius.all(Radius.circular(50))
+              ),
+              child: Center(
+                child: Text(
+                  'SIGN UP',
+                  style: TextStyle(color: Colors.white,
+                      fontWeight: FontWeight.bold
+                  ),
+                ),
+              ),
+    ) ,
+          )
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    double _defaultLoginSize = MediaQuery.of(context).size.height / 1.6;
+
+    loginSize = Tween<double>(begin: _defaultLoginSize, end: 200).animate(
+        CurvedAnimation(parent: loginController, curve: Curves.linear));
+
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: <Widget>[
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: AnimatedOpacity(
+              opacity: isLogin ? 0.0 : 1.0,
+              duration: animationDuration,
+                child: Container(child: _buildRegistercomponents()),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              color: isLogin && !loginController.isAnimating ? Colors.white : Colors.transparent,
+              width: MediaQuery.of(context).size.width,
+              height: _defaultLoginSize/1.5,
+              child: Visibility(
+                visible: isLogin,
+                child: GestureDetector(
+                  onTap: () {
+                    loginController.forward();
+                    setState(() {
+                      isLogin = !isLogin;
+                    });
+                  },
+                  child: Center(
+                    child: Text(
+                      'Sign Up'.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0XFF2a3ed7),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ],
-        ),
+          ),
+          AnimatedBuilder(
+            animation: loginController,
+            builder: (context, child) {
+              return _buildLoginWidgets();
+            },
+          ),
+          Align(
+            alignment: Alignment.topCenter,
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height/2,
+                  child: Center(child: _buildLoginComponents()),
+              )
+          )
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
