@@ -20,6 +20,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
 
+  final _formKey = GlobalKey<FormState>();
 
   // necessary for mocking (unit and widget tests)
   late Backend _backend;    // library with functions to access backend
@@ -35,51 +36,8 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
 
-    TextEditingController usernameController = TextEditingController();
+    TextEditingController emailController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
-
-    void genericErrorMessage(String message) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _loginButtonPressed() async {
-
-    if (usernameController.text.isEmpty) {
-      genericErrorMessage("Please type in your username");
-      return;
-    }
-    if (passwordController.text.isEmpty) {
-      genericErrorMessage("Please type in your password");
-      return;
-    }
-
-  bool isAuthenticated = await _backend.userIsAuthenticated(
-    _client,
-    usernameController.text,
-    passwordController.text,
-  );
-
-  if (isAuthenticated) {
-    Navigator.pushNamed(context, '/dash');
-  } else {
-    genericErrorMessage("Invalid username or password");
-  }
-}
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -89,6 +47,8 @@ class _LoginPageState extends State<LoginPage> {
             padding: const EdgeInsets.symmetric(horizontal: 40),
             height: MediaQuery.of(context).size.height - 50,
             width: double.infinity,
+            child: Form (
+              key: _formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -116,7 +76,8 @@ class _LoginPageState extends State<LoginPage> {
                 Column(
                   children: <Widget>[
                     TextFormField(
-                      controller: usernameController,
+                      key: Key("email"),
+                      controller: emailController,
                       keyboardType: TextInputType.text,
                       maxLines: 1,
                       decoration: InputDecoration(
@@ -129,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                           prefixIcon: const Icon(Icons.person)),
                       validator: (text) {
                         if (text == null || text.isEmpty) {
-                          return 'Error: please enter username';
+                          return 'Error: please enter email';
                         }
                         return null;
                       }
@@ -138,6 +99,7 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 20),
                                 
                     TextFormField(
+                      key: Key("password"),
                       controller: passwordController,
                       keyboardType: TextInputType.text,
                       maxLines: 1,
@@ -149,7 +111,7 @@ class _LoginPageState extends State<LoginPage> {
                               borderSide: BorderSide.none),
                           fillColor: kPrimaryColor,
                           filled: true,
-                          prefixIcon: const Icon(Icons.lock)),
+                          prefixIcon: const Icon(Icons.key)),
                       validator: (text) {
                         if (text == null || text.isEmpty) {
                           return 'Error: please enter password';
@@ -166,18 +128,42 @@ class _LoginPageState extends State<LoginPage> {
                     padding: const EdgeInsets.only(top: 3, left: 3),
 
                     child: ElevatedButton(
-                      onPressed: () {
-                        _loginButtonPressed();
+                      onPressed: () async {
+                        if (_formKey.currentState?.validate() ?? false) {
+                            bool isLoggedIn = await _backend.userIsAuthenticated(
+                            _client, emailController.text, passwordController.text);
+                          if (isLoggedIn) {
+                            Navigator.pushNamed(context, '/dash');
+                          } else {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    backgroundColor: Colors.white,
+                                    title: Text("Login failed"),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: Text('OK'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                          }
+                        }
                       },
                       child: const Text(
-                        "Log In",
-                        style: TextStyle(fontSize: 20),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        shape: const StadiumBorder(),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: kPrimaryDarkColor,
-                      ),
+                          "Login",
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          shape: const StadiumBorder(),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: kPrimaryDarkColor,
+                        ),
                     )
                 ),
 
@@ -198,6 +184,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
       ),
+    ),
     );
   }
 }

@@ -70,29 +70,20 @@ class Backend {
     }
   }
 
-  Future<bool> userIsAuthenticated(http.Client client, String enteredUsername,
-      String enteredPassword) async {
+  Future<bool> userIsAuthenticated(http.Client client, String email, String password) async {
     try {
+
+      Map data = {
+      'email': email,
+      'password': password,
+    };
       // Access REST interface with a GET request to check if the username exists
-      var response = await client.post(Uri.parse('${_backend}login'));
+      var response = await client.post(Uri.parse('${_backend}login'),
+      headers: <String, String>{'Content-Type': 'application/json'},
+      body: json.encode(data));
 
-      // Check if the user with the specified username exists
-      if (response.statusCode == 200) {
-        // If the user exists, check if the entered password matches the stored one
-        var userData = json.decode(utf8.decode(response.bodyBytes));
-        if (userData is bool) {
-          return userData;
-        }
-        String storedPassword = userData['password'];
+      return json.decode(utf8.decode(response.bodyBytes));
 
-        return enteredPassword == storedPassword;
-      } else if (response.statusCode == 404) {
-        // User with the specified username does not exist
-        return false;
-      } else {
-        // Failed to check user authentication
-        return false;
-      }
     } catch (e) {
       // Handle exceptions, e.g., network errors
       print('Error checking user authentication: $e');

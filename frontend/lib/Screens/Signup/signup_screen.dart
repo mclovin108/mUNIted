@@ -241,6 +241,7 @@ class _SignupPageState extends State<SignupPage> {
                       const Text("Bereits registriert?"),
                       TextButton(
                           onPressed: () {
+                            Navigator.pushNamed(context, '/login');
                           },
                           child: const Text("Anmelden", style: TextStyle(color: kPrimaryDarkColor),)
                       )
