@@ -10,20 +10,6 @@ class Backend {
   // use IP 10.0.2.2 to access localhost from emulator! 
   // static const _backend = "http://10.0.2.2:8080/";
 
-  // get user list from backend
-  Future<List<User>> fetchUserList(http.Client client) async {
-
-     // access REST interface with get request
-    final response = await client.get(Uri.parse('${_backend}users'));
-
-    // check response from backend
-    if (response.statusCode == 200) {
-      return List<User>.from(json.decode(utf8.decode(response.bodyBytes)).map((x) => User.fromJson(x)));
-    } else {
-      throw Exception('Failed to load User List');
-    }
-  }
-
   Future<User> createUser(http.Client client, String username, String email, String password, String confirmPassword) async {
 
     Map data = {
@@ -45,6 +31,40 @@ class Backend {
       throw Exception('Failed to create user');
     }
 
+  }
+
+  Future<bool> isUsernameAvailable(http.Client client, String username) async {
+    final response = await client.get(Uri.parse('${_backend}items'));
+
+    if (response.statusCode == 200) {
+    // Konvertieren Sie die Antwort in eine Liste von Benutzern
+    List<User> userList = List<User>.from(json.decode(utf8.decode(response.bodyBytes)).map((x) => User.fromJson(x)));
+
+    // Überprüfen, ob der angegebene Benutzername bereits vergeben ist
+    bool isAvailable = userList.every((user) => user.username != username);
+
+    return isAvailable;
+  } else {
+    // Fehler beim Laden der Benutzerliste
+    throw Exception('Failed to load user list');
+  }
+}
+
+  Future<bool> isEmailAvailable(http.Client client, String email) async {
+    final response = await client.get(Uri.parse('${_backend}items'));
+
+    if (response.statusCode == 200) {
+    // Konvertieren Sie die Antwort in eine Liste von Benutzern
+    List<User> userList = List<User>.from(json.decode(utf8.decode(response.bodyBytes)).map((x) => User.fromJson(x)));
+
+    // Überprüfen, ob der angegebene Benutzername bereits vergeben ist
+    bool isAvailable = userList.every((user) => user.email != email);
+
+    return isAvailable;
+  } else {
+    // Fehler beim Laden der Benutzerliste
+    throw Exception('Failed to load user list');
+  }
   }
 
   Future<bool> userIsAuthenticated(http.Client client, String enteredUsername, String enteredPassword) async {
@@ -72,5 +92,4 @@ class Backend {
     return false;
   }
 }
-  
 }
