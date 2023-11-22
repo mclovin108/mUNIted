@@ -1,17 +1,18 @@
 import 'dart:convert';
-import '../model/user.dart';
+
 import 'package:http/http.dart' as http;
 
+import '../model/user.dart';
 
 class Backend {
-  // use IP 10.0.2.2 to access localhost from windows client 
+  // use IP 10.0.2.2 to access localhost from windows client
   static const _backend = "http://127.0.0.1:8080/";
-  
-  // use IP 10.0.2.2 to access localhost from emulator! 
+
+  // use IP 10.0.2.2 to access localhost from emulator!
   // static const _backend = "http://10.0.2.2:8080/";
 
-  Future<User> createUser(http.Client client, String username, String email, String password, String confirmPassword) async {
-
+  Future<User> createUser(http.Client client, String username, String email,
+      String password, String confirmPassword) async {
     Map data = {
       'username': username,
       'email': email,
@@ -19,10 +20,9 @@ class Backend {
     };
 
     // access REST interface with post request
-    var response = await client.post(Uri.parse('${_backend}users'),
+    var response = await client.post(Uri.parse('${_backend}register'),
         headers: <String, String>{'Content-Type': 'application/json'},
-        body: json.encode(data)
-    );
+        body: json.encode(data));
 
     // check response from backend
     if (response.statusCode == 200) {
@@ -30,66 +30,73 @@ class Backend {
     } else {
       throw Exception('Failed to create user');
     }
-
   }
 
   Future<bool> isUsernameAvailable(http.Client client, String username) async {
     final response = await client.get(Uri.parse('${_backend}items'));
 
     if (response.statusCode == 200) {
-    // Konvertieren Sie die Antwort in eine Liste von Benutzern
-    List<User> userList = List<User>.from(json.decode(utf8.decode(response.bodyBytes)).map((x) => User.fromJson(x)));
+      // Konvertieren Sie die Antwort in eine Liste von Benutzern
+      List<User> userList = List<User>.from(json
+          .decode(utf8.decode(response.bodyBytes))
+          .map((x) => User.fromJson(x)));
 
-    // Überprüfen, ob der angegebene Benutzername bereits vergeben ist
-    bool isAvailable = userList.every((user) => user.username != username);
+      // Überprüfen, ob der angegebene Benutzername bereits vergeben ist
+      bool isAvailable = userList.every((user) => user.username != username);
 
-    return isAvailable;
-  } else {
-    // Fehler beim Laden der Benutzerliste
-    throw Exception('Failed to load user list');
+      return isAvailable;
+    } else {
+      // Fehler beim Laden der Benutzerliste
+      throw Exception('Failed to load user list');
+    }
   }
-}
 
   Future<bool> isEmailAvailable(http.Client client, String email) async {
     final response = await client.get(Uri.parse('${_backend}items'));
 
     if (response.statusCode == 200) {
-    // Konvertieren Sie die Antwort in eine Liste von Benutzern
-    List<User> userList = List<User>.from(json.decode(utf8.decode(response.bodyBytes)).map((x) => User.fromJson(x)));
+      // Konvertieren Sie die Antwort in eine Liste von Benutzern
+      List<User> userList = List<User>.from(json
+          .decode(utf8.decode(response.bodyBytes))
+          .map((x) => User.fromJson(x)));
 
-    // Überprüfen, ob der angegebene Benutzername bereits vergeben ist
-    bool isAvailable = userList.every((user) => user.email != email);
+      // Überprüfen, ob der angegebene Benutzername bereits vergeben ist
+      bool isAvailable = userList.every((user) => user.email != email);
 
-    return isAvailable;
-  } else {
-    // Fehler beim Laden der Benutzerliste
-    throw Exception('Failed to load user list');
-  }
-  }
-
-  Future<bool> userIsAuthenticated(http.Client client, String enteredUsername, String enteredPassword) async {
-  try {
-    // Access REST interface with a GET request to check if the username exists
-    var response = await client.get(Uri.parse('${_backend}users/$enteredUsername'));
-
-    // Check if the user with the specified username exists
-    if (response.statusCode == 200) {
-      // If the user exists, check if the entered password matches the stored one
-      var userData = json.decode(utf8.decode(response.bodyBytes));
-      String storedPassword = userData['password'];
-
-      return enteredPassword == storedPassword;
-    } else if (response.statusCode == 404) {
-      // User with the specified username does not exist
-      return false;
+      return isAvailable;
     } else {
-      // Failed to check user authentication
+      // Fehler beim Laden der Benutzerliste
+      throw Exception('Failed to load user list');
+    }
+  }
+
+  Future<bool> userIsAuthenticated(http.Client client, String enteredUsername,
+      String enteredPassword) async {
+    try {
+      // Access REST interface with a GET request to check if the username exists
+      var response = await client.post(Uri.parse('${_backend}login'));
+
+      // Check if the user with the specified username exists
+      if (response.statusCode == 200) {
+        // If the user exists, check if the entered password matches the stored one
+        var userData = json.decode(utf8.decode(response.bodyBytes));
+        if (userData is bool) {
+          return userData;
+        }
+        String storedPassword = userData['password'];
+
+        return enteredPassword == storedPassword;
+      } else if (response.statusCode == 404) {
+        // User with the specified username does not exist
+        return false;
+      } else {
+        // Failed to check user authentication
+        return false;
+      }
+    } catch (e) {
+      // Handle exceptions, e.g., network errors
+      print('Error checking user authentication: $e');
       return false;
     }
-  } catch (e) {
-    // Handle exceptions, e.g., network errors
-    print('Error checking user authentication: $e');
-    return false;
   }
-}
 }
