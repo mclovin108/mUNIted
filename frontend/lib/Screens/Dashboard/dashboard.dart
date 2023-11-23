@@ -27,7 +27,41 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: VerticalCardList(),
+      body: Stack(
+        children: [
+          VerticalCardList(),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 60, // Set the desired height
+              color: kPrimaryDarkColor,
+            ),
+          ),
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: Container(
+              width: 65,
+              height: 65,
+              child: FloatingActionButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/create');
+                },
+                backgroundColor: kPrimaryDarkColor,
+                elevation: 0,
+                child: Icon(
+                  Icons.add,
+                  size: 32,
+                  color: kPrimaryLightColor,
+                ),
+                shape: CircleBorder(),
+              ),
+            ),
+          ),
+        ],
+      ),
       backgroundColor: kPrimaryColor,
     );
   }
@@ -39,7 +73,12 @@ class VerticalCardList extends StatelessWidget {
     return ListView.builder(
       itemCount: 20,
       itemBuilder: (context, index) {
-        return VerticalCard();
+        return GestureDetector(
+          onTap: () {
+            Navigator.pushNamed(context, '/detail');
+          },
+          child: VerticalCard(),
+        );
       },
     );
   }
@@ -63,7 +102,7 @@ class VerticalCard extends StatelessWidget {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: kPrimaryColor,
+                  color: kSecondaryColor,
                   shape: BoxShape.circle,
                 ),
                 child: Center(
@@ -85,12 +124,20 @@ class VerticalCard extends StatelessWidget {
                   children: [
                     Text(
                       'Title',
-                      style: Theme.of(context).textTheme.headline6,
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w500,
+                        color: kPrimaryDarkColor,
+                      ),
                     ),
                     SizedBox(height: 4),
                     Text(
                       'Subtitle',
-                      style: Theme.of(context).textTheme.bodyText2,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: kPrimaryDarkColor,
+                      ),
                     ),
                   ],
                 ),
@@ -98,7 +145,7 @@ class VerticalCard extends StatelessWidget {
               Container(
                 padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                 decoration: BoxDecoration(
-                  color: kPrimaryDarkColor, // Change to the desired color
+                  color: kSecondaryColor,
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(12),
                     bottomRight: Radius.circular(12),
@@ -113,7 +160,7 @@ class VerticalCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w500,
-                        color: Colors.white, // Change to the desired text color
+                        color: kPrimaryLightColor,
                       ),
                     ),
                     SizedBox(height: 5),
@@ -122,7 +169,7 @@ class VerticalCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: Colors.white, // Change to the desired text color
+                        color: kPrimaryLightColor,
                       ),
                     ),
                   ],
@@ -135,4 +182,3 @@ class VerticalCard extends StatelessWidget {
     );
   }
 }
-
