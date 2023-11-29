@@ -1,6 +1,16 @@
 package com.munited.munited.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.Set;
 
 /**
  * User repräsentiert einen Benutzer der App. Dieser hat eine E-Mail, einen Benutzernamen und ein Passwort.
@@ -10,6 +20,11 @@ import jakarta.persistence.*;
  */
 @Entity
 @Table(name = "users")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class User {
     /**
      * Eindeutige ID des Benutzers. Wird von der Datenbank generiert
@@ -31,35 +46,18 @@ public class User {
      */
     @Column(nullable = false)
     private String password;
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "registrations",
+    joinColumns = {
+            @JoinColumn(name = "user_id", referencedColumnName = "id")
+    },
+    inverseJoinColumns = {
+            @JoinColumn(name = "event_id", referencedColumnName = "id")
+    })
+    @JsonBackReference
+    private Set<Event> signedUpEvents;
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    @OneToMany(mappedBy = "creator", fetch = FetchType.EAGER)
+    private Set<Event> createdEvents;
 }
