@@ -3,13 +3,28 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../model/user.dart';
+import '../model/meeting.dart';
 
 class Backend {
   // use IP 10.0.2.2 to access localhost from windows client
-  static const _backend = "http://127.0.0.1:8080/";
+  static const _backend = "http://127.0.0.1:3000/";
 
   // use IP 10.0.2.2 to access localhost from emulator!
   // static const _backend = "http://10.0.2.2:8080/";
+
+  // get meeting list from backend
+  Future<List<Meeting>> fetchMeetingList(http.Client client) async {
+
+     // access REST interface with get request
+    final response = await client.get(Uri.parse('${_backend}meetings'));
+
+    // check response from backend
+    if (response.statusCode == 200) {
+      return List<Meeting>.from(json.decode(utf8.decode(response.bodyBytes)).map((x) => Meeting.fromJson(x)));
+    } else {
+      throw Exception('Failed to load MeetingList');
+    }
+  }
 
   Future<User> createUser(http.Client client, String username, String email,
       String password, String confirmPassword) async {
@@ -33,7 +48,7 @@ class Backend {
   }
 
   Future<bool> isUsernameAvailable(http.Client client, String username) async {
-    final response = await client.get(Uri.parse('${_backend}items'));
+    final response = await client.get(Uri.parse('${_backend}users'));
 
     if (response.statusCode == 200) {
       // Konvertieren Sie die Antwort in eine Liste von Benutzern
@@ -52,7 +67,7 @@ class Backend {
   }
 
   Future<bool> isEmailAvailable(http.Client client, String email) async {
-    final response = await client.get(Uri.parse('${_backend}items'));
+    final response = await client.get(Uri.parse('${_backend}users'));
 
     if (response.statusCode == 200) {
       // Konvertieren Sie die Antwort in eine Liste von Benutzern
