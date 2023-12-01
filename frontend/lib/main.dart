@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => SignupPage(Backend(), http.Client()),
         '/dash': (context) => Dashboard(Backend(), http.Client()),
         '/login': (context) => LoginPage(Backend(), http.Client()),
-        '/detail': (context) => DetailPage(),
+        '/detail': (context) => Detail(Backend(), http.Client()),
         '/create': (context) => CreatePage(),
       },
     );

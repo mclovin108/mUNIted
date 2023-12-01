@@ -27,18 +27,22 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+            appBar: AppBar(
+        backgroundColor: kPrimaryDarkColor,
+        title: const Text(
+          'mUNIted',
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Righteous',
+            fontSize: 26,
+          ),
+        ),
+        centerTitle: true,
+        foregroundColor: kPrimaryLightColor,
+      ),
       body: Stack(
         children: [
           VerticalCardList(),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 60, // Set the desired height
-              color: kPrimaryDarkColor,
-            ),
-          ),
           Positioned(
             bottom: 16,
             right: 16,
