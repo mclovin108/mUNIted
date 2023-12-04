@@ -153,4 +153,39 @@ class Backend {
       return {'authenticated': false, 'user': null, 'userId': null};
     }
   }
+
+  Future<void> createMeeting(http.Client client, String title, String icon, DateTime start, String description,
+  int? maxVisitors, double? costs, List<String>? labels, User creator, List<User>? visitors) async {
+    try {
+
+    Map<String, dynamic> data = {
+      'title': title,
+      'icon': icon,
+      'start': start.toUtc().toIso8601String(),
+      'description': description,
+      'maxVisitors': maxVisitors,
+      'costs': costs,
+      'labels': labels,
+      'creator': creator.toJson(),
+      'visitors': visitors?.map((user) => user.toJson()).toList(),
+    };
+
+      var response = await client.post(
+        Uri.parse('${_backend}meetings'),
+        headers: <String, String>{'Content-Type': 'application/json'},
+        body: json.encode(data)
+      );
+
+      if (response.statusCode == 200) {
+        print('Meeting created successfully');
+      } else {
+        print('Failed to create meeting. Status code: ${response.statusCode}');
+        throw Exception('Failed to create meeting');
+      }
+    } catch (e) {
+      print('Error creating meeting: $e');
+      throw Exception('Error creating meeting');
+    }
+  }
+
 }

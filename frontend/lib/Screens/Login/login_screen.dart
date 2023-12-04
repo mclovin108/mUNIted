@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants.dart';
 import '../../Backend/backend.dart';
-import 'package:munited/model/UserProvider.dart';
+import 'package:munited/model/user_provider.dart';
 import 'package:munited/model/user.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
