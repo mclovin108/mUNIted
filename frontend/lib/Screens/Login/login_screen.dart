@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../constants.dart';
 import '../../Backend/backend.dart';
+import 'package:munited/model/UserProvider.dart';
+import 'package:munited/model/user.dart';
+import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
 
@@ -130,9 +133,18 @@ class _LoginPageState extends State<LoginPage> {
                     child: ElevatedButton(
                       onPressed: () async {
                         if (_formKey.currentState?.validate() ?? false) {
-                            bool isLoggedIn = await _backend.userIsAuthenticated(
-                            _client, emailController.text, passwordController.text);
-                          if (isLoggedIn) {
+                          Map<String, dynamic> authenticationResult = await _backend.userIsAuthenticated(
+                            _client,
+                            emailController.text,
+                            passwordController.text,
+                          );
+
+                          bool isAuthenticated = authenticationResult['authenticated'] ?? false;
+                          User authenticatedUser = authenticationResult['user'] ?? null;
+                          int userId = authenticationResult['userId'];
+                          if (isAuthenticated) {
+                            // Setzen Benutzer-ID im Provider
+                            context.read<UserProvider>().setUserId(userId);
                             Navigator.pushNamed(context, '/dash');
                           } else {
                               showDialog(

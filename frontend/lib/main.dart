@@ -5,10 +5,13 @@ import 'package:munited/Backend/backend.dart';
 import 'package:munited/Screens/Dashboard/dashboard.dart';
 import 'package:munited/Screens/Login/login_screen.dart';
 import 'Screens/Signup/signup_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:munited/model/UserProvider.dart';
 
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    MyApp());
 }
 
 
@@ -17,14 +20,17 @@ class MyApp extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'mUNIted App',
-      initialRoute: '/signup', // Set the initial route
-      routes: {
-        '/signup': (context) => SignupPage(Backend(), http.Client()),
-        '/dash': (context) => Dashboard(),
-        '/login': (context) => LoginPage(Backend(), http.Client()),
-      },
+    return ChangeNotifierProvider(
+      create: (context) => UserProvider(),
+      child: MaterialApp(
+        title: 'mUNIted App',
+        initialRoute: '/signup', // Set the initial route
+        routes: {
+          '/signup': (context) => SignupPage(Backend(), http.Client()),
+          '/dash': (context) => Dashboard(),
+          '/login': (context) => LoginPage(Backend(), http.Client()),
+        },
+      ),
     );
   }
 }
