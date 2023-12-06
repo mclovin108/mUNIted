@@ -113,4 +113,29 @@ public class EventController {
         }
         return event;
     }
+
+    /**
+     * Method used for signing a user off from an event
+     *
+     * @param eventId die ID des Events, von dem sich ein Nutzer abmelden möchte
+     * @param userId die ID des Users, der entfernt werden soll
+     * @return
+     */
+    @PostMapping("/events/{eventId}/signoff/{userId}")
+    public Event signOffFromEvent(@PathVariable("eventId") Long eventId, @PathVariable("userId") Long userId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+        if (user.getSignedUpEvents().contains(event)) {
+            user.getSignedUpEvents().remove(event);
+            userRepository.save(user);
+            if (event.getVisitors() == null) {
+                event.setVisitors(new HashSet<>());
+            }
+            event.getVisitors().remove(user);
+            eventRepository.save(event);
+        }
+        return event;
+    }
 }
