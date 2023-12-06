@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-<<<<<<< frontend/lib/main.dart
+
     return ChangeNotifierProvider(
       create: (context) => UserProvider(),
       child: MaterialApp(
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
           '/signup': (context) => SignupPage(Backend(), http.Client()),
           '/dash': (context) => Dashboard(),
           '/login': (context) => LoginPage(Backend(), http.Client()),
-          '/detail': (context) => DetailPage(),
+          '/detail': (context) => Detail(Backend(), http.Client()),
           '/create': (context) => CreatePage(),
         },
       ),
