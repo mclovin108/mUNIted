@@ -51,7 +51,7 @@ public class AuthController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
-    @GetMapping("/users/")
+    @GetMapping("/users")
     List<User> getUsers() {
         return userRepository.findAll();
     }
