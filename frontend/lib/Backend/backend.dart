@@ -50,7 +50,7 @@ class Backend {
   Future<User?> getUserById(http.Client client, int userId) async {
     try {
       var response = await client.get(
-        Uri.parse('$_backend/users/$userId'),
+        Uri.parse('${_backend}users/$userId'),
       );
 
       if (response.statusCode == 200) {
@@ -166,7 +166,7 @@ class Backend {
         'maxVisitors': maxVisitors,
         'costs': costs,
         'labels': labels,
-        'creator': creator.toJson(),
+        'creatorId': creator.id,
         'visitors': visitors?.map((user) => user.toJson()).toList(),
       };
 
