@@ -1,9 +1,6 @@
 package com.munited.munited.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,7 +21,6 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class User {
     /**
      * Eindeutige ID des Benutzers. Wird von der Datenbank generiert
@@ -55,9 +51,10 @@ public class User {
     inverseJoinColumns = {
             @JoinColumn(name = "event_id", referencedColumnName = "id")
     })
-    @JsonBackReference
+    @JsonIgnore
     private Set<Event> signedUpEvents;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "creator", fetch = FetchType.EAGER)
     private Set<Event> createdEvents;
 }

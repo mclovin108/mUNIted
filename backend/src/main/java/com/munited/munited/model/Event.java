@@ -25,7 +25,6 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Event {
     /**
      * Eindeutige ID des Events. Wird von der Datenbank generiert.
@@ -77,9 +76,8 @@ public class Event {
     private List<String> labels;
 
     @ManyToMany(mappedBy = "signedUpEvents", fetch = FetchType.EAGER)
-    @JsonManagedReference
     private Set<User> visitors;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     private User creator;
 }
