@@ -7,7 +7,7 @@ import 'package:munited/model/meeting.dart';
 
 class Backend {
   // use IP 10.0.2.2 to access localhost from windows client
-  static const _backend = "http://127.0.0.1:3000/";
+  static const _backend = "http://127.0.0.1:8080/";
 
   // use IP 10.0.2.2 to access localhost from emulator!
   // static const _backend = "http://10.0.2.2:8080/";

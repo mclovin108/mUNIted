@@ -89,6 +89,8 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                   ],
                 ),
                 TextFormField(
+                  key: Key("title"),
+                  keyboardType: TextInputType.text,
                   controller: _titleController,
                   decoration: InputDecoration(
                               hintText: "Titel",
@@ -109,6 +111,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                 const SizedBox(height: 20),
 
                 TextFormField(
+                  key: Key("icon"),
                   controller: _iconController,
                   readOnly: true,
                   decoration: InputDecoration(
@@ -164,6 +167,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                   },
                   child: IgnorePointer(
                     child: TextFormField(
+                      key: Key("start"),
                       controller: _startController,
                       decoration: InputDecoration(
                         hintText: "Startzeit",
@@ -186,6 +190,8 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                 const SizedBox(height: 20),
 
                 TextFormField(
+                  key: Key("description"),
+                  keyboardType: TextInputType.text,
                   controller: _descriptionController,
                   decoration: InputDecoration(
                     hintText: "Beschreibung",
@@ -206,6 +212,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                 const SizedBox(height: 20),
 
                 TextFormField(
+                  key: Key("maxVisitors"),
                   controller: _maxVisitorsController,
                   decoration: InputDecoration(
                               hintText: "Maximale Besucher",
@@ -221,6 +228,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                 const SizedBox(height: 20),
 
                 TextFormField(
+                  key: Key("costs"),
                   controller: _costsController,
                   decoration: InputDecoration(
                               hintText: "Kosten",
@@ -236,6 +244,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                 const SizedBox(height: 20),
 
                 TextFormField(
+                  key: Key("labels"),
                   controller: _labelsController,
                   decoration: InputDecoration(
                               hintText: "Labels",
