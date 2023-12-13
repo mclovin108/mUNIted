@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:munited/Backend/backend.dart';
 import 'package:munited/model/meeting.dart';
 import 'package:http/http.dart' as http;
+//import 'package:test/test.dart';
 import 'create_meeting_unit_test.mocks.dart';
+import 'package:munited/Screens/CreateMeeting/create_meeting.dart';
 
 const _backend = "http://127.0.0.1:8080/";
 
@@ -23,7 +26,7 @@ void main() {
         body: anyNamed('body'),
         headers: anyNamed('headers'),
       )).thenAnswer((_) async =>
-          http.Response('{"id": 1, "title": "Meeting 1", "description": "Description 1"}', 200));
+          http.Response('{"id": 1, "title": "Meeting 1", "icon": "😃", "description": "Description 1", "start": "2007-03-01T13:00:00"}', 200));
 
       // Build our app and trigger a frame.
       await tester.pumpWidget(
@@ -35,10 +38,11 @@ void main() {
       // Enter data into the form fields.
       await tester.enterText(find.byKey(Key("title")), "Meeting 1");
       await tester.enterText(find.byKey(Key("icon")), "😃");
-      // Enter other data into the remaining form fields...
+      await tester.enterText(find.byKey(Key("description")), "Description 1");
+      await tester.enterText(find.byKey(Key("start")), "2007-03-01T13:00:00");
 
       // Tap the "Meeting erstellen" button.
-      await tester.tap(find.text('Meeting erstellen'));
+      await tester.tap(find.byType(ElevatedButton));
 
       // Wait for the createMeeting function to finish.
       await tester.pump();
