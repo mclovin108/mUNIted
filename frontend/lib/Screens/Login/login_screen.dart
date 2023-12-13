@@ -84,7 +84,7 @@ class _LoginPageState extends State<LoginPage> {
                       keyboardType: TextInputType.text,
                       maxLines: 1,
                       decoration: InputDecoration(
-                          hintText: "Username",
+                          hintText: "E-Mail",
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(18),
                               borderSide: BorderSide.none),
@@ -93,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
                           prefixIcon: const Icon(Icons.person)),
                       validator: (text) {
                         if (text == null || text.isEmpty) {
-                          return 'Error: please enter email';
+                          return 'Error: Bitte E-Mail eingeben';
                         }
                         return null;
                       }
@@ -108,7 +108,7 @@ class _LoginPageState extends State<LoginPage> {
                       maxLines: 1,
                       obscureText: true,
                       decoration: InputDecoration(
-                          hintText: "Password",
+                          hintText: "Passwort",
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(18),
                               borderSide: BorderSide.none),
@@ -117,7 +117,7 @@ class _LoginPageState extends State<LoginPage> {
                           prefixIcon: const Icon(Icons.key)),
                       validator: (text) {
                         if (text == null || text.isEmpty) {
-                          return 'Error: please enter password';
+                          return 'Error: Bitte Passwort eingeben';
                         }
                         return null;
                       }
