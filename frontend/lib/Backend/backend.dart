@@ -1,9 +1,8 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-
-import 'package:munited/model/user.dart';
 import 'package:munited/model/meeting.dart';
+import 'package:munited/model/user.dart';
 
 class Backend {
   // use IP 10.0.2.2 to access localhost from windows client
@@ -14,13 +13,14 @@ class Backend {
 
   // get meeting list from backend
   Future<List<Meeting>> fetchMeetingList(http.Client client) async {
-
-     // access REST interface with get request
-    final response = await client.get(Uri.parse('${_backend}meetings'));
+    // access REST interface with get request
+    final response = await client.get(Uri.parse('${_backend}events'));
 
     // check response from backend
     if (response.statusCode == 200) {
-      return List<Meeting>.from(json.decode(utf8.decode(response.bodyBytes)).map((x) => Meeting.fromJson(x)));
+      return List<Meeting>.from(json
+          .decode(utf8.decode(response.bodyBytes))
+          .map((x) => Meeting.fromJson(x)));
     } else {
       throw Exception('Failed to load MeetingList');
     }
@@ -108,7 +108,8 @@ class Backend {
     }
   }
 
-  Future<Map<String, dynamic>> userIsAuthenticated(http.Client client, String email, String password) async {
+  Future<Map<String, dynamic>> userIsAuthenticated(
+      http.Client client, String email, String password) async {
     try {
       Map<String, dynamic> data = {
         'email': email,
@@ -127,22 +128,13 @@ class Backend {
         Map<String, dynamic> responseBody =
             json.decode(utf8.decode(response.bodyBytes));
 
-        // Check if authentication is successful
-        bool isAuthenticated = responseBody['authenticated'] ?? false;
+        // Create a User object from the user data
+        User user = User.fromJson(responseBody);
 
-        // If authenticated, return user information including user ID
-        if (isAuthenticated) {
-          // Assuming your API returns user data in the 'user' field
-          Map<String, dynamic> userData = responseBody['user'] ?? {};
+        // Get the user ID from the user object
+        int? userId = user.id;
 
-          // Create a User object from the user data
-          User user = User.fromJson(userData);
-
-          // Get the user ID from the user object
-          int? userId = user.id;
-
-          return {'authenticated': isAuthenticated, 'user': user, 'userId': userId};
-        }
+        return {'authenticated': true, 'user': user, 'userId': userId};
       }
 
       // Authentication failed
@@ -154,27 +146,33 @@ class Backend {
     }
   }
 
-  Future<void> createMeeting(http.Client client, String title, String icon, DateTime start, String description,
-  int? maxVisitors, double? costs, List<String>? labels, User creator, List<User>? visitors) async {
+  Future<void> createMeeting(
+      http.Client client,
+      String title,
+      String icon,
+      DateTime start,
+      String description,
+      int? maxVisitors,
+      double? costs,
+      List<String>? labels,
+      User creator,
+      List<User>? visitors) async {
     try {
+      Map<String, dynamic> data = {
+        'title': title,
+        'icon': icon,
+        'start': start.toUtc().toIso8601String(),
+        'description': description,
+        'maxVisitors': maxVisitors,
+        'costs': costs,
+        'labels': labels,
+        'creator': creator.toJson(),
+        'visitors': visitors?.map((user) => user.toJson()).toList(),
+      };
 
-    Map<String, dynamic> data = {
-      'title': title,
-      'icon': icon,
-      'start': start.toUtc().toIso8601String(),
-      'description': description,
-      'maxVisitors': maxVisitors,
-      'costs': costs,
-      'labels': labels,
-      'creator': creator.toJson(),
-      'visitors': visitors?.map((user) => user.toJson()).toList(),
-    };
-
-      var response = await client.post(
-        Uri.parse('${_backend}meetings'),
-        headers: <String, String>{'Content-Type': 'application/json'},
-        body: json.encode(data)
-      );
+      var response = await client.post(Uri.parse('${_backend}events'),
+          headers: <String, String>{'Content-Type': 'application/json'},
+          body: json.encode(data));
 
       if (response.statusCode == 200) {
         print('Meeting created successfully');
@@ -187,5 +185,4 @@ class Backend {
       throw Exception('Error creating meeting');
     }
   }
-
 }

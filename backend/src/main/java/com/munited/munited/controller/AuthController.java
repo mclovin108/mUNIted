@@ -6,10 +6,9 @@ import com.munited.munited.database.UserRepository;
 import com.munited.munited.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -33,12 +32,27 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    boolean login(@RequestBody LoginBody body) {
+    User login(@RequestBody LoginBody body) {
         User exampleUser = new User();
         exampleUser.setEmail(body.getEmail());
         exampleUser.setPassword(body.getPassword());
         Example<User> example = Example.of(exampleUser);
         List<User> possibleUsers = userRepository.findAll(example);
-        return !possibleUsers.isEmpty();
+        if(possibleUsers.isEmpty()) {
+           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        return possibleUsers.getFirst();
+    }
+
+    @GetMapping("/users/{id}")
+    User getUserById(@PathVariable("id") Long id) {
+        return userRepository
+                .findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
+    @GetMapping("/users/")
+    List<User> getUsers() {
+        return userRepository.findAll();
     }
 }
