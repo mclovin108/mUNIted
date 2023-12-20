@@ -12,6 +12,7 @@ class Meeting {
   double? costs;
   List<String>? labels;
   User creator;
+  String username;
   List<User>? visitors;
 
   Meeting({
@@ -24,17 +25,22 @@ class Meeting {
     this.costs,
     this.labels,
     required this.creator,
+    required this.username,
     this.visitors,
   });
 
   // parse Meeting from JSON-data
   factory Meeting.fromJson(Map<String, dynamic> json) {
+    
+    var creatorJson = json["creator"] as Map<String, dynamic>;
+
     var meeting = Meeting(
       id: json["id"] as int,
       title: json["title"] as String,
       icon: json["icon"] as String,
       start: DateTime.parse(json["start"] as String),
       description: json["description"] as String,
+      username: creatorJson["username"] as String,
       creator: User.fromJson(json["creator"] as Map<String, dynamic>),
     );
     if (json["maxVisitors"] != null) {

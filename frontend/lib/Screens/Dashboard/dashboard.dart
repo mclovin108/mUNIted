@@ -1,7 +1,9 @@
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:munited/model/meeting.dart';
 import '../../constants.dart';
 import '../../Backend/backend.dart';
-import 'package:http/http.dart' as http;
 
 class Dashboard extends StatefulWidget {
   final Backend backend;
@@ -16,13 +18,30 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   late Backend _backend;
   late http.Client _client;
+  List<Meeting> events = [];
 
   @override
   void initState() {
     super.initState();
     _backend = widget.backend;
     _client = widget.client;
+
+    _fetchEvents();
   }
+
+  Future<void> _fetchEvents() async {
+    try {
+      final List<Meeting> fetchedEvents = await _backend.fetchEvents(_client);
+
+      setState(() {
+        events = fetchedEvents;
+      });
+    } catch (e) {
+      // Handle the error
+      print('Error fetching events: $e');
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +61,7 @@ class _DashboardState extends State<Dashboard> {
       ),
       body: Stack(
         children: [
-          VerticalCardList(),
+          VerticalCardList(events: events),
           Positioned(
             bottom: 16,
             right: 16,
@@ -50,8 +69,11 @@ class _DashboardState extends State<Dashboard> {
               width: 65,
               height: 65,
               child: FloatingActionButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/create');
+                onPressed: () async {
+                  var result = await Navigator.pushNamed(context, '/create');
+                  if(result != null && result is bool) {
+                    await _fetchEvents();
+                  }
                 },
                 backgroundColor: kPrimaryDarkColor,
                 elevation: 0,
@@ -72,16 +94,21 @@ class _DashboardState extends State<Dashboard> {
 }
 
 class VerticalCardList extends StatelessWidget {
+
+  final List<Meeting> events;
+
+  VerticalCardList({required this.events});
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: 20,
+      itemCount: events.length,
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () {
             Navigator.pushNamed(context, '/detail');
           },
-          child: VerticalCard(),
+          child: VerticalCard(event: events[index]),
         );
       },
     );
@@ -89,6 +116,11 @@ class VerticalCardList extends StatelessWidget {
 }
 
 class VerticalCard extends StatelessWidget {
+
+  final Meeting event;
+
+  VerticalCard({required this.event});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -114,7 +146,7 @@ class VerticalCard extends StatelessWidget {
                     alignment: Alignment.center,
                     children: [
                       Text(
-                        '🏀',
+                        event.icon,
                         style: TextStyle(fontSize: 35),
                       ),
                     ],
@@ -127,7 +159,7 @@ class VerticalCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Title',
+                      event.title,
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.w500,
@@ -136,7 +168,7 @@ class VerticalCard extends StatelessWidget {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      'Subtitle',
+                      event.username,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -160,7 +192,7 @@ class VerticalCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      '14',
+                      event.start.day.toString(),
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w500,
@@ -169,7 +201,7 @@ class VerticalCard extends StatelessWidget {
                     ),
                     SizedBox(height: 5),
                     Text(
-                      'Mai',
+                      DateFormat.MMMM().format(event.start),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
