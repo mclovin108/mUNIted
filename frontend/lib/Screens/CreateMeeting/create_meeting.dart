@@ -279,6 +279,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                   : null,
               creator,
               []);
+          Navigator.pop(context, true);
           print('Meeting created successfully');
         } catch (e) {
           print('Failed to create meeting: $e');

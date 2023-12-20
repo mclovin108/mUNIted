@@ -185,4 +185,32 @@ class Backend {
       throw Exception('Error creating meeting');
     }
   }
+
+Future<List<Meeting>> fetchEvents(http.Client client) async {
+  try {
+    final response = await client.get(Uri.parse('${_backend}events'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonResponse = json.decode(utf8.decode(response.bodyBytes));
+
+      // Ensure that the JSON response is a list
+      if (jsonResponse is List) {
+        // Filter out items that are not of type Map<String, dynamic> (Meeting objects)
+        final List<Meeting> fetchedEvents = jsonResponse
+            .whereType<Map<String, dynamic>>() // Filter out non-Meeting items
+            .map((e) => Meeting.fromJson(e))
+            .toList();
+
+        return fetchedEvents;
+      } else {
+        throw Exception('Invalid JSON response: Expected a list but received ${jsonResponse.runtimeType}');
+      }
+    } else {
+      throw Exception('Failed to load events. Status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error fetching events: $e');
+    throw Exception('Failed to load events');
+  }
+}
 }
