@@ -3,30 +3,34 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:munited/Backend/backend.dart';
 import 'package:munited/constants.dart';
+import 'package:munited/model/meeting.dart';
 import 'package:munited/model/user.dart';
 import 'package:munited/model/user_provider.dart';
 import 'package:provider/provider.dart';
 
-class CreateMeetingPage extends StatefulWidget {
+class EditMeetingPage extends StatefulWidget {
   final Backend _backend;
   final http.Client _client;
+  final Meeting _meeting;
 
-  const CreateMeetingPage(this._backend, this._client);
+  const EditMeetingPage(this._backend, this._client, this._meeting);
 
   @override
-  State<CreateMeetingPage> createState() => _CreateMeetingPageState();
+  State<EditMeetingPage> createState() => _EditMeetingPageState();
 }
 
-class _CreateMeetingPageState extends State<CreateMeetingPage> {
+class _EditMeetingPageState extends State<EditMeetingPage> {
   // necessary for mocking (unit and widget tests)
   late Backend _backend; // library with functions to access backend
   late http.Client _client; // REST client proxy
+  late Meeting _meeting;
 
   @override
   void initState() {
     super.initState();
     _backend = widget._backend;
     _client = widget._client;
+    _meeting = widget._meeting;
   }
 
   final _formKey = GlobalKey<FormState>();
@@ -40,6 +44,8 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
   final TextEditingController _maxVisitorsController = TextEditingController();
   final TextEditingController _costsController = TextEditingController();
   final TextEditingController _labelsController = TextEditingController();
+
+   
 
   void _showEmojiPicker() {
     showDialog(
@@ -58,6 +64,17 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    _titleController.text = _meeting.title;
+    _iconController.text = _meeting.icon;
+    _startController.text = _meeting.start.toString();
+    _startDateTime = _meeting.start;
+    _descriptionController.text = _meeting.description;
+    _maxVisitorsController.text = _meeting.maxVisitors.toString();
+    _costsController.text = _meeting.costs.toString();
+    _labelsController.text = _meeting.labels.toString();
+
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: kPrimaryDarkColor,
@@ -73,7 +90,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
             alignment: Alignment.topLeft
             ),
           onPressed: () {
-            // Logik für den zurück
+            Navigator.pop(context);
           },
         ),
       ),
@@ -259,11 +276,11 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     // Formular ist gültig, Meeting erstellen
-                    createMeeting();
+                    editMeeting();
                     Navigator.pushNamed(context, '/dash');
                   }
                 },
-                child: Text('Meeting erstellen'),
+                child: Text('Meeting editieren'),
                 style: ElevatedButton.styleFrom(
                   shape: const StadiumBorder(),
                   padding:
@@ -278,30 +295,18 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
     );
   }
 
-  Future<void> createMeeting() async {
+  Future<void> editMeeting() async {
     int? creatorId = context.read<UserProvider>().getUserId();
     // Überprüfen, ob der Benutzer eingeloggt ist
     if (creatorId != null) {
       User? creator = await _backend.getUserById(http.Client(), creatorId);
       if (creator != null) {
         try {
-          await _backend.createMeeting(
-              http.Client(),
-              _titleController.text,
-              _iconController.text,
-              DateTime.parse(_startController.text),
-              _descriptionController.text,
-              int.tryParse(_maxVisitorsController.text),
-              double.tryParse(_costsController.text),
-              _labelsController.text.isNotEmpty
-                  ? _labelsController.text.split(',')
-                  : null,
-              creator,
-              []);
-          Navigator.pop(context, true);
-          print('Meeting created successfully');
+          // Logik für Meeting Update
+
+          print('Meeting updated successfully');
         } catch (e) {
-          print('Failed to create meeting: $e');
+          print('Failed to update meeting: $e');
         }
       }
     } else {
