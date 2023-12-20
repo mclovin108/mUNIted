@@ -59,6 +59,24 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: kPrimaryDarkColor,
+        title: const Text(
+          'Meeting erstellen',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        leading: BackButton(
+          style: ButtonStyle(
+            backgroundColor: MaterialStatePropertyAll<Color>(kPrimaryLightColor),
+            alignment: Alignment.topLeft
+            ),
+          onPressed: () {
+            // Logik für den zurück
+          },
+        ),
+      ),
       body: SingleChildScrollView(
           child: Padding(
         padding: const EdgeInsets.all(16.0),
