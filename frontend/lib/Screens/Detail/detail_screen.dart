@@ -1,6 +1,5 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
+import 'package:munited/Screens/EditMeeting/edit_meeting_screen.dart';
 import 'package:munited/model/meeting.dart';
 import 'package:munited/constants.dart';
 import 'package:munited/Backend/backend.dart';
@@ -57,19 +56,21 @@ class _DetailPageState extends State<Detail> {
         ),
         foregroundColor: kPrimaryLightColor,
       ),
-      body: MeetingDetailTestPage(isCreator: _isCreator, meeting: _meeting,),
+      body: MeetingDetailPage(backend: _backend, client: _client, isCreator: _isCreator, meeting: _meeting,),
       backgroundColor: kPrimaryColor,
     );
   }
 }
 
 
-class MeetingDetailTestPage extends StatelessWidget {
+class MeetingDetailPage extends StatelessWidget {
 
   final bool isCreator;
   final Meeting meeting;
+  final Backend backend;
+  final http.Client client;
 
-  const MeetingDetailTestPage({Key? key, required this.isCreator, required this.meeting}) : super(key: key);
+  const MeetingDetailPage({Key? key, required this.backend, required this.client, required this.isCreator, required this.meeting}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -280,7 +281,10 @@ class MeetingDetailTestPage extends StatelessWidget {
                         backgroundColor: MaterialStatePropertyAll<Color>(Colors.redAccent)
                         ),
                           onPressed: () {
-                            // Logik für den "Löschen"-Button hier
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => EditMeetingPage(backend, client, meeting)),
+                            );
                           },
                           child: Icon(Icons.delete),
                         ),
