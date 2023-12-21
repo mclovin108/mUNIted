@@ -1,6 +1,9 @@
 package com.munited.munited.controller.requests;
 
 import com.munited.munited.model.User;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.security.Timestamp;
 import java.sql.Date;
@@ -12,6 +15,9 @@ import java.util.List;
  *
  * @author Nico Harbig
  */
+@Getter
+@Setter
+@NoArgsConstructor
 public class EventBody {
     private String title;
     private String icon;
