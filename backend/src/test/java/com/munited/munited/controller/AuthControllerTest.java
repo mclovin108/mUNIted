@@ -1,11 +1,9 @@
-package com.munited.munited;
+package com.munited.munited.controller;
 
-import com.munited.munited.controller.AuthController;
 import com.munited.munited.controller.requests.LoginBody;
 import com.munited.munited.controller.requests.RegisterBody;
 import com.munited.munited.database.UserRepository;
 import com.munited.munited.model.User;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
@@ -22,9 +19,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.mockito.BDDMockito.*;
-import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * AuthControllerTest repräsentiert
  *
@@ -57,6 +56,7 @@ public class AuthControllerTest {
 
         loginBody = new LoginBody("test@example.com", "password");
     }
+
     @AfterEach
     public void tearDown() throws Exception {
         mockClosable.close();
@@ -75,6 +75,7 @@ public class AuthControllerTest {
 
         verify(repository, times(1)).save(any(User.class));
     }
+
     @Test
     public void testLogin() {
         given(repository.findAll(any(Example.class))).willReturn(Collections.singletonList(user));
@@ -120,7 +121,7 @@ public class AuthControllerTest {
     public void testGetUserByIdNotFound() {
         given(repository.findById(any(Long.class))).willReturn(Optional.empty());
 
-         Throwable thrown = catchThrowable(() -> authController.getUserById(1L));
+        Throwable thrown = catchThrowable(() -> authController.getUserById(1L));
 
         assertInstanceOf(ResponseStatusException.class, thrown);
         assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) thrown).getStatusCode());

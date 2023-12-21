@@ -23,7 +23,7 @@ public class AuthController {
     private UserRepository userRepository;
 
     @PostMapping("/register")
-    public User register(@RequestBody RegisterBody body) {
+     User register(@RequestBody RegisterBody body) {
         User user = new User();
         user.setUsername(body.getUsername());
         user.setEmail(body.getEmail());
@@ -32,7 +32,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public User login(@RequestBody LoginBody body) {
+     User login(@RequestBody LoginBody body) {
         User exampleUser = new User();
         exampleUser.setEmail(body.getEmail());
         exampleUser.setPassword(body.getPassword());
@@ -45,14 +45,14 @@ public class AuthController {
     }
 
     @GetMapping("/users/{id}")
-    public User getUserById(@PathVariable("id") Long id) {
+     User getUserById(@PathVariable("id") Long id) {
         return userRepository
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
     @GetMapping("/users")
-    public List<User> getUsers() {
+    List<User> getUsers() {
         return userRepository.findAll();
     }
 }
