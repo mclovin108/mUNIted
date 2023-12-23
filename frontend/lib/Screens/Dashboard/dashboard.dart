@@ -168,7 +168,7 @@ class VerticalCard extends StatelessWidget {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      event.username,
+                      'username',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
