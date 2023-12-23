@@ -133,7 +133,7 @@ class Backend {
 
   // Event backend 
 
-  Future<void> createMeeting(
+  Future<Meeting> createEvent(
       http.Client client,
       String title,
       String icon,
@@ -162,7 +162,7 @@ class Backend {
           body: json.encode(data));
 
       if (response.statusCode == 200) {
-        print('Meeting created successfully');
+        return Meeting.fromJson(json.decode(utf8.decode(response.bodyBytes)));
       } else {
         print('Failed to create meeting. Status code: ${response.statusCode}');
         throw Exception('Failed to create meeting');
@@ -173,7 +173,7 @@ class Backend {
     }
   }
 
-  Future<void> updateEvent(
+  Future<Meeting> updateEvent(
       http.Client client,
       int id,
       String title,
@@ -206,8 +206,11 @@ class Backend {
       );
 
       // check response from backend
-      if (response.statusCode != 200) {
-        throw Exception('Failed to update event');
+      if (response.statusCode == 200) {
+        return Meeting.fromJson(json.decode(utf8.decode(response.bodyBytes)));
+      } else {
+        print('Failed to update meeting. Status code: ${response.statusCode}');
+        throw Exception('Failed to update meeting');
       }
       } catch (e) {
       print('Error updating event: $e');

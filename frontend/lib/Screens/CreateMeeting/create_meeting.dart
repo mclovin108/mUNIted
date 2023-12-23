@@ -285,7 +285,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
       User? creator = await _backend.getUserById(http.Client(), creatorId);
       if (creator != null) {
         try {
-          await _backend.createMeeting(
+          await _backend.createEvent(
               http.Client(),
               _titleController.text,
               _iconController.text,
