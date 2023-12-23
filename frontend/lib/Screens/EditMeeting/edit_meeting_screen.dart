@@ -276,7 +276,7 @@ class _EditMeetingPageState extends State<EditMeetingPage> {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     // Formular ist gültig, Meeting erstellen
-                    editMeeting();
+                    editMeeting(_meeting.id);
                     Navigator.pushNamed(context, '/dash');
                   }
                 },
@@ -295,14 +295,28 @@ class _EditMeetingPageState extends State<EditMeetingPage> {
     );
   }
 
-  Future<void> editMeeting() async {
+  Future<void> editMeeting(int id) async {
     int? creatorId = context.read<UserProvider>().getUserId();
     // Überprüfen, ob der Benutzer eingeloggt ist
     if (creatorId != null) {
       User? creator = await _backend.getUserById(http.Client(), creatorId);
       if (creator != null) {
         try {
-          // Logik für Meeting Update
+          await _backend.updateEvent(
+              http.Client(),
+              id,
+              _titleController.text,
+              _iconController.text,
+              DateTime.parse(_startController.text),
+              _descriptionController.text,
+              int.tryParse(_maxVisitorsController.text),
+              double.tryParse(_costsController.text),
+              _labelsController.text.isNotEmpty
+                  ? _labelsController.text.split(',')
+                  : null,
+              creator,
+              _meeting.visitors);
+          Navigator.pop(context, true);
 
           print('Meeting updated successfully');
         } catch (e) {
