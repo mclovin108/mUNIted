@@ -1,6 +1,7 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:munited/Backend/backend.dart';
 import 'package:munited/constants.dart';
 import 'package:munited/model/user.dart';
@@ -73,7 +74,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
             alignment: Alignment.topLeft
             ),
           onPressed: () {
-            // Logik für den zurück
+            Navigator.pop(context);
           },
         ),
       ),
@@ -168,7 +169,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                         selectedTime.hour,
                         selectedTime.minute,
                       );
-                      _startController.text = _startDateTime.toString();
+                      _startController.text = DateFormat('dd.MM.yy, HH:mm').format(_startDateTime);
                     }
                   }
                 },
@@ -226,6 +227,12 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                     filled: true,
                     prefixIcon: const Icon(Icons.people)),
                 keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (!RegExp(r'^[0-9]+$').hasMatch(value!)) {
+                    return '"Maximale Besucher" muss ein Zahlenwert sein';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 20),
               TextFormField(
@@ -240,13 +247,19 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                     filled: true,
                     prefixIcon: const Icon(Icons.euro)),
                 keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (!RegExp(r'^[0-9]+$').hasMatch(value!)) {
+                    return '"Kosten" muss ein Zahlenwert sein';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 20),
               TextFormField(
                 key: Key("labels"),
                 controller: _labelsController,
                 decoration: InputDecoration(
-                    hintText: "Labels",
+                    hintText: "Labels (mehrere Label können durch Komma separiert werden)",
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(18),
                         borderSide: BorderSide.none),
@@ -260,7 +273,6 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                   if (_formKey.currentState!.validate()) {
                     // Formular ist gültig, Meeting erstellen
                     createMeeting();
-                    Navigator.pushNamed(context, '/dash');
                   }
                 },
                 child: Text('Meeting erstellen'),

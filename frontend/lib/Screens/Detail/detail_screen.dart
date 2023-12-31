@@ -43,24 +43,18 @@ class _DetailPageState extends State<Detail> {
     }
 
     return Scaffold(
-      appBar: AppBar(
+appBar: AppBar(
         leading: BackButton(
-          style: ButtonStyle(
-            backgroundColor: MaterialStatePropertyAll<Color>(kPrimaryLightColor),
-            alignment: Alignment.topLeft
-            ),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        backgroundColor: kPrimaryDarkColor,
-        title: const Text(
+        title: Text(
           'Details',
           style: TextStyle(
             fontWeight: FontWeight.w500,
           ),
         ),
-        foregroundColor: kPrimaryLightColor,
       ),
       backgroundColor: kPrimaryColor,
       body: SingleChildScrollView(

@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
       create: (context) => UserProvider(),
       child: MaterialApp(
         title: 'mUNIted App',
-        initialRoute: '/dash', // Set the initial route
+        initialRoute: '/login', // Set the initial route
         routes: {
           '/signup': (context) => SignupPage(Backend(), http.Client()),
           '/dash': (context) => Dashboard(Backend(), http.Client()),

@@ -106,7 +106,8 @@ class VerticalCardList extends StatelessWidget {
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () {
-            Navigator.pushNamed(context, '/detail');
+            Navigator.pushNamed(context, '/detail'
+            , arguments: events[index]);
           },
           child: VerticalCard(event: events[index]),
         );
@@ -168,7 +169,7 @@ class VerticalCard extends StatelessWidget {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      'username',
+                      event.creator.username,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
