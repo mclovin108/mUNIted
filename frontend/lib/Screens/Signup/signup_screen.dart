@@ -126,7 +126,7 @@ class _SignupPageState extends State<SignupPage> {
                               filled: true,
                               prefixIcon: const Icon(Icons.mail)),
                           validator: (text) {
-                            if (text == null || text.isEmpty || !text.contains('@')) {
+                            if (text == null || text.isEmpty || !text.contains('@') || !text.contains('.')) {
                               return 'Error: Bitte korrekte E-Mail angeben';
                             }
                             return null;

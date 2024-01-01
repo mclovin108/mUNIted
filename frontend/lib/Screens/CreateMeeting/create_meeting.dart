@@ -60,23 +60,18 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+appBar: AppBar(
         backgroundColor: kPrimaryDarkColor,
         title: const Text(
-          'Meeting erstellen',
+          'Event erstellen',
           style: TextStyle(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Righteous',
+            fontSize: 26,
           ),
         ),
-        leading: BackButton(
-          style: ButtonStyle(
-            backgroundColor: MaterialStatePropertyAll<Color>(kPrimaryLightColor),
-            alignment: Alignment.topLeft
-            ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        centerTitle: true,
+        foregroundColor: kPrimaryLightColor,
       ),
       body: SingleChildScrollView(
           child: Padding(
@@ -85,21 +80,6 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
           key: _formKey,
           child: Column(
             children: <Widget>[
-              Column(
-                children: <Widget>[
-                  const SizedBox(height: 15.0),
-                  const Text(
-                    "Meeting erstellen",
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                ],
-              ),
               TextFormField(
                 key: Key("title"),
                 keyboardType: TextInputType.text,
@@ -109,7 +89,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(18),
                         borderSide: BorderSide.none),
-                    fillColor: kPrimaryColor,
+                    fillColor: kPrimaryLightColor,
                     filled: true,
                     prefixIcon: const Icon(Icons.mail)),
                 validator: (value) {
@@ -129,7 +109,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18),
                       borderSide: BorderSide.none),
-                  fillColor: kPrimaryColor,
+                  fillColor: kPrimaryLightColor,
                   filled: true,
                   prefixIcon: IconButton(
                     icon: Icon(Icons.emoji_emotions),
@@ -169,7 +149,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                         selectedTime.hour,
                         selectedTime.minute,
                       );
-                      _startController.text = DateFormat('dd.MM.yy, HH:mm').format(_startDateTime);
+                     _startController.text = DateFormat('dd.MM.yy, HH:mm').format(_startDateTime);
                     }
                   }
                 },
@@ -182,7 +162,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(18),
                             borderSide: BorderSide.none),
-                        fillColor: kPrimaryColor,
+                        fillColor: kPrimaryLightColor,
                         filled: true,
                         prefixIcon: const Icon(Icons.event)),
                     validator: (value) {
@@ -204,7 +184,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(18),
                         borderSide: BorderSide.none),
-                    fillColor: kPrimaryColor,
+                    fillColor: kPrimaryLightColor,
                     filled: true,
                     prefixIcon: const Icon(Icons.event_note)),
                 validator: (value) {
@@ -223,12 +203,12 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(18),
                         borderSide: BorderSide.none),
-                    fillColor: kPrimaryColor,
+                    fillColor: kPrimaryLightColor,
                     filled: true,
                     prefixIcon: const Icon(Icons.people)),
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (!RegExp(r'^[0-9]+$').hasMatch(value!)) {
+                  if (!(value == null || value.isEmpty) && !RegExp(r'^[0-9]+$').hasMatch(value!)) {
                     return '"Maximale Besucher" muss ein Zahlenwert sein';
                   }
                   return null;
@@ -243,12 +223,12 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(18),
                         borderSide: BorderSide.none),
-                    fillColor: kPrimaryColor,
+                    fillColor: kPrimaryLightColor,
                     filled: true,
                     prefixIcon: const Icon(Icons.euro)),
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (!RegExp(r'^[0-9]+$').hasMatch(value!)) {
+                  if (!(value == null || value.isEmpty) && !RegExp(r'^[0-9]+$').hasMatch(value!)) {
                     return '"Kosten" muss ein Zahlenwert sein';
                   }
                   return null;
@@ -259,11 +239,11 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                 key: Key("labels"),
                 controller: _labelsController,
                 decoration: InputDecoration(
-                    hintText: "Labels (mehrere Label können durch Komma separiert werden)",
+                    hintText: "Label (mehrere Label können durch Komma separiert werden)",
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(18),
                         borderSide: BorderSide.none),
-                    fillColor: kPrimaryColor,
+                    fillColor: kPrimaryLightColor,
                     filled: true,
                     prefixIcon: const Icon(Icons.add_circle)),
               ),
@@ -275,7 +255,10 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
                     createMeeting();
                   }
                 },
-                child: Text('Meeting erstellen'),
+                child: Text('Meeting erstellen', 
+                style: TextStyle(
+                  color: kPrimaryLightColor,
+                ),),
                 style: ElevatedButton.styleFrom(
                   shape: const StadiumBorder(),
                   padding:
@@ -287,6 +270,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
           ),
         ),
       )),
+      backgroundColor: kPrimaryColor,
     );
   }
 
@@ -301,7 +285,7 @@ class _CreateMeetingPageState extends State<CreateMeetingPage> {
               http.Client(),
               _titleController.text,
               _iconController.text,
-              DateTime.parse(_startController.text),
+              DateTime.parse(_startDateTime.toString()),
               _descriptionController.text,
               int.tryParse(_maxVisitorsController.text),
               double.tryParse(_costsController.text),

@@ -13,7 +13,7 @@ class Detail extends StatefulWidget {
   final http.Client client;
   Meeting meeting;
 
-  Detail(this.backend, this.client, this.meeting);
+  Detail(this.backend, this.client, {required this.meeting});
 
   @override
   _DetailPageState createState() => _DetailPageState();
@@ -43,18 +43,24 @@ class _DetailPageState extends State<Detail> {
     }
 
     return Scaffold(
-appBar: AppBar(
+      appBar: AppBar(
         leading: BackButton(
+          style: ButtonStyle(
+            backgroundColor: MaterialStatePropertyAll<Color>(kPrimaryLightColor),
+            alignment: Alignment.topLeft
+            ),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        title: Text(
+        backgroundColor: kPrimaryDarkColor,
+        title: const Text(
           'Details',
           style: TextStyle(
             fontWeight: FontWeight.w500,
           ),
         ),
+        foregroundColor: kPrimaryLightColor,
       ),
       backgroundColor: kPrimaryColor,
       body: SingleChildScrollView(
