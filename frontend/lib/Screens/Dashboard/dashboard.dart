@@ -1,7 +1,9 @@
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:munited/Screens/Detail/detailpage.dart';
 import 'package:munited/model/meeting.dart';
+import 'package:munited/model/user.dart';
 import '../../constants.dart';
 import '../../Backend/backend.dart';
 
@@ -42,11 +44,10 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            appBar: AppBar(
+      appBar: AppBar(
         backgroundColor: kPrimaryDarkColor,
         title: const Text(
           'mUNIted',
@@ -71,7 +72,7 @@ class _DashboardState extends State<Dashboard> {
               child: FloatingActionButton(
                 onPressed: () async {
                   var result = await Navigator.pushNamed(context, '/create');
-                  if(result != null && result is bool) {
+                  if (result != null && result is bool) {
                     await _fetchEvents();
                   }
                 },
@@ -94,7 +95,6 @@ class _DashboardState extends State<Dashboard> {
 }
 
 class VerticalCardList extends StatelessWidget {
-
   final List<Meeting> events;
 
   VerticalCardList({required this.events});
@@ -105,9 +105,20 @@ class VerticalCardList extends StatelessWidget {
       itemCount: events.length,
       itemBuilder: (context, index) {
         return GestureDetector(
-          onTap: () {
-            Navigator.pushNamed(context, 'detail', arguments: events[index]);
-          },
+onTap: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => Detail(
+        Backend(),
+        http.Client(),
+        events[index],
+      ),
+    ),
+  );
+},
+
+
           child: VerticalCard(event: events[index]),
         );
       },
@@ -116,7 +127,6 @@ class VerticalCardList extends StatelessWidget {
 }
 
 class VerticalCard extends StatelessWidget {
-
   final Meeting event;
 
   VerticalCard({required this.event});

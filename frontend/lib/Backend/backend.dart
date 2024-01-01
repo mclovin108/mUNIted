@@ -261,4 +261,28 @@ class Backend {
     }
   }
 
+  Future<void> signUpToEvent(int eventId, int userId) async {
+    final response = await http.post(
+      Uri.parse('${_backend}events/$eventId/register/$userId'),
+    );
+
+    if (response.statusCode == 200) {
+      print('Signed up successfully');
+    } else {
+      print('Failed to sign up. Status code: ${response.statusCode}');
+    }
+  }
+
+  Future<void> signOffFromEvent(int eventId, int userId) async {
+    final response = await http.post(
+      Uri.parse('${_backend}events/$eventId/signoff/$userId'),
+    );
+
+    if (response.statusCode == 200) {
+      print('Signed off successfully');
+    } else {
+      print('Failed to sign off. Status code: ${response.statusCode}');
+    }
+  }
+
 }

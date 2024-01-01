@@ -1,3 +1,4 @@
+/*
 import 'package:flutter/material.dart';
 import 'package:munited/Screens/EditMeeting/edit_meeting_screen.dart';
 import 'package:munited/model/meeting.dart';
@@ -362,3 +363,4 @@ class _DetailPageState extends State<Detail> {
   }
 
 }
+*/
