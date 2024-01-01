@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:munited/Screens/EditMeeting/edit_meeting_screen.dart';
 import 'package:munited/model/meeting.dart';
 import 'package:munited/model/user.dart';
 import 'package:munited/model/user_provider.dart';
@@ -43,7 +43,13 @@ class _DetailPageState extends State<Detail> {
       AllVisitors = _meeting.visitors!.length;
     }
 
-    bool isSignedUp = checkSignUp();
+    bool isSignedUp = false;
+    int id = context.read<UserProvider>().getUserId()!;
+
+    for (User user in _meeting.visitors!) {
+      if (user.id == id) isSignedUp = true;
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: kPrimaryDarkColor,
@@ -121,7 +127,7 @@ class _DetailPageState extends State<Detail> {
                                       color: kPrimaryDarkColor,
                                     ),
                                   ),
-                                  SizedBox(height: 8),
+                                  SizedBox(height: 16),
                                   Text(
                                     'Teilnehmeranzahl: ' +
                                         (_meeting.maxVisitors != 0
@@ -155,7 +161,7 @@ class _DetailPageState extends State<Detail> {
                                       color: kPrimaryLightColor,
                                     ),
                                   ),
-                                  SizedBox(height: 5),
+                                  SizedBox(height: 16),
                                   Text(
                                     DateFormat('MMM').format(_meeting.start),
                                     style: TextStyle(
@@ -170,6 +176,7 @@ class _DetailPageState extends State<Detail> {
                           ],
                         ),
                       ),
+                      SizedBox(height: 16),
                       Text(
                         'Startzeit: ' +
                             DateFormat('HH:mm').format(_meeting.start) +
@@ -180,10 +187,10 @@ class _DetailPageState extends State<Detail> {
                           color: kPrimaryDarkColor,
                         ),
                       ),
-                      SizedBox(height: 8),
+                      SizedBox(height: 16),
                       Text(
                         _meeting.costs != null && _meeting.costs != 0
-                            ? 'Costs: ${_meeting.costs} €'
+                            ? 'Kosten: ${_meeting.costs} €'
                             : 'Kostenlos',
                         style: TextStyle(
                           fontSize: 24,
@@ -209,30 +216,64 @@ class _DetailPageState extends State<Detail> {
                         ),
                       ),
                       SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          if (!isSignedUp) {
-                            _backend.signUpToEvent(_meeting.id, context.read<UserProvider>().userId!);
-                            _showAlertDialog("Sie haben sich angemeldet");
-                          } else {
-                            _backend.signOffFromEvent(_meeting.id, context.read<UserProvider>().userId!);
-                            _showAlertDialog("Sie haben sich abgemeldet");
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: kPrimaryDarkColor,
-                          foregroundColor: kPrimaryLightColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                      if (_meeting.visitors!.length < _meeting.maxVisitors! ||
+                          _meeting.maxVisitors! == 0) ...[
+                        Row(
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                if (!isSignedUp) {
+                                  _backend.signUpToEvent(_meeting.id,
+                                      context.read<UserProvider>().userId!);
+                                  _showAlertDialog("Sie haben sich angemeldet");
+                                } else {
+                                  _backend.signOffFromEvent(_meeting.id,
+                                      context.read<UserProvider>().userId!);
+                                  _showAlertDialog("Sie haben sich abgemeldet");
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: kPrimaryDarkColor,
+                                foregroundColor: kPrimaryLightColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Text(
+                                  isSignedUp ? 'Abmelden' : 'Anmelden',
+                                ),
+                              ),
+                            ),
+                            if (_isCreator) ...[
+                              SizedBox(width: 8), // Add spacing between buttons
+                              IconButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => EditMeetingPage(_backend, _client, _meeting)),
+                              );
+                                },
+                                icon: Icon(Icons.edit),
+                                color:
+                                    kPrimaryDarkColor,
+                              ),
+                              SizedBox(width: 8), // Add spacing between buttons
+                              IconButton(
+                                onPressed: () {
+                                  _backend.deleteEvent(_client, _meeting.id);
+                                  _showAlertDialog("Das Event wurde erfolgreich gelöscht");
+
+                                },
+                                icon: Icon(Icons.delete),
+                                color:
+                                    kPrimaryDarkColor,
+                              ),
+                            ],
+                          ],
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text(
-                            isSignedUp ? 'Abmelden' : 'Anmelden',
-                          ),
-                        ),
-                      ),
+                      ],
                     ],
                   ),
                 ),
@@ -258,7 +299,6 @@ class _DetailPageState extends State<Detail> {
               onPressed: () {
                 Navigator.pop(context);
                 Navigator.pop(context);
-                Navigator.popAndPushNamed(context, '/dash');
               },
               child: Text('OK'),
             ),
@@ -266,14 +306,5 @@ class _DetailPageState extends State<Detail> {
         );
       },
     );
-  }
-  
-  bool checkSignUp() {
-    int id = context.read<UserProvider>().getUserId()!;
-
-    for (User user in _meeting.visitors!) {
-      if (user.id == id) return true;
-    }
-    return false;
   }
 }

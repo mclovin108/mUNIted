@@ -62,7 +62,7 @@ class _DashboardState extends State<Dashboard> {
       ),
       body: Stack(
         children: [
-          VerticalCardList(events: events),
+          VerticalCardList(events: events, onFetchEvents: _fetchEvents),
           Positioned(
             bottom: 16,
             right: 16,
@@ -96,8 +96,9 @@ class _DashboardState extends State<Dashboard> {
 
 class VerticalCardList extends StatelessWidget {
   final List<Meeting> events;
+  final VoidCallback onFetchEvents;
 
-  VerticalCardList({required this.events});
+  VerticalCardList({required this.events, required this.onFetchEvents});
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +107,7 @@ class VerticalCardList extends StatelessWidget {
       itemBuilder: (context, index) {
         return GestureDetector(
 onTap: () {
-  Navigator.push(
+  var result = Navigator.push(
     context,
     MaterialPageRoute(
       builder: (context) => Detail(
@@ -115,10 +116,10 @@ onTap: () {
         events[index],
       ),
     ),
-  );
+  ).then((_) {
+    onFetchEvents();
+  });
 },
-
-
           child: VerticalCard(event: events[index]),
         );
       },

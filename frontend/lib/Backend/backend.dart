@@ -200,7 +200,7 @@ class Backend {
       };
 
       // access REST interface with post request
-      var response = await client.patch(Uri.parse('${_backend}events/$id'),
+      var response = await client.put(Uri.parse('${_backend}events/$id'),
           headers: <String, String>{'Content-Type': 'application/json'},
           body: json.encode(data)
       );
@@ -220,9 +220,7 @@ class Backend {
 
   Future<void> deleteEvent(http.Client client, int id) async {
 
-    final url = Uri.parse('${_backend}events/$id');
-
-      final response = await client.delete(url);
+      final response = await client.delete(Uri.parse('${_backend}events/$id'));
 
       if (response.statusCode != 200) {
         if (response.statusCode == 404) {
@@ -231,6 +229,7 @@ class Backend {
           throw Exception('Failed to delete event with id $id. Status code: ${response.statusCode}');
         }
       }
+      print('Event deleted');
   }
 
   Future<List<Meeting>> fetchEvents(http.Client client) async {
