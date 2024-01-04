@@ -12,7 +12,6 @@ class Meeting {
   double? costs;
   List<String>? labels;
   User creator;
-  String username;
   List<User>? visitors;
 
   Meeting({
@@ -25,7 +24,6 @@ class Meeting {
     this.costs,
     this.labels,
     required this.creator,
-    required this.username,
     this.visitors,
   });
 
@@ -40,7 +38,6 @@ class Meeting {
       icon: json["icon"] as String,
       start: DateTime.parse(json["start"] as String),
       description: json["description"] as String,
-      username: creatorJson["username"] as String,
       creator: User.fromJson(json["creator"] as Map<String, dynamic>),
     );
     if (json["maxVisitors"] != null) {
@@ -66,7 +63,7 @@ class Meeting {
     var map = {
       "title": title,
       "icon": icon,
-      "start": start.toUtc().toIso8601String(),
+      "start": start.toIso8601String(),
       "description": description,
       "creatorId": creator.id.toString(),
     };

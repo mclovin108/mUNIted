@@ -1,7 +1,9 @@
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:munited/Screens/Detail/detailpage.dart';
 import 'package:munited/model/meeting.dart';
+import 'package:munited/model/user.dart';
 import '../../constants.dart';
 import '../../Backend/backend.dart';
 
@@ -42,11 +44,10 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            appBar: AppBar(
+      appBar: AppBar(
         backgroundColor: kPrimaryDarkColor,
         title: const Text(
           'mUNIted',
@@ -61,7 +62,7 @@ class _DashboardState extends State<Dashboard> {
       ),
       body: Stack(
         children: [
-          VerticalCardList(events: events),
+          VerticalCardList(events: events, onFetchEvents: _fetchEvents),
           Positioned(
             bottom: 16,
             right: 16,
@@ -71,7 +72,7 @@ class _DashboardState extends State<Dashboard> {
               child: FloatingActionButton(
                 onPressed: () async {
                   var result = await Navigator.pushNamed(context, '/create');
-                  if(result != null && result is bool) {
+                  if (result != null && result is bool) {
                     await _fetchEvents();
                   }
                 },
@@ -94,10 +95,10 @@ class _DashboardState extends State<Dashboard> {
 }
 
 class VerticalCardList extends StatelessWidget {
-
   final List<Meeting> events;
+  final VoidCallback onFetchEvents;
 
-  VerticalCardList({required this.events});
+  VerticalCardList({required this.events, required this.onFetchEvents});
 
   @override
   Widget build(BuildContext context) {
@@ -105,9 +106,20 @@ class VerticalCardList extends StatelessWidget {
       itemCount: events.length,
       itemBuilder: (context, index) {
         return GestureDetector(
-          onTap: () {
-            Navigator.pushNamed(context, '/detail');
-          },
+onTap: () {
+  var result = Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => Detail(
+        Backend(),
+        http.Client(),
+        events[index],
+      ),
+    ),
+  ).then((_) {
+    onFetchEvents();
+  });
+},
           child: VerticalCard(event: events[index]),
         );
       },
@@ -116,7 +128,6 @@ class VerticalCardList extends StatelessWidget {
 }
 
 class VerticalCard extends StatelessWidget {
-
   final Meeting event;
 
   VerticalCard({required this.event});
@@ -168,7 +179,7 @@ class VerticalCard extends StatelessWidget {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      event.username,
+                      event.creator.username,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,

@@ -1,18 +1,25 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:munited/Screens/Dashboard/dashboard.dart';
 import 'package:http/http.dart' as http;
 import 'package:munited/Backend/backend.dart';
 import 'package:munited/Screens/CreateMeeting/create_meeting.dart';
-import 'package:munited/Screens/Detail/detailpage.dart';
+import 'package:munited/Screens/Detail/detail_screen.dart';
 
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'dashboard_page_test.mocks.dart';
+
+import '../unit_tests/fetch_meeting_list_test.mocks.dart';
+
+
+class MockNavigatorObserver extends Mock implements NavigatorObserver {}
+
+const _backend = "http://127.0.0.1:8080/events";
 
 
 class TestWrapperAppDashboard1 extends StatelessWidget {
-  static const _backend = "http://127.0.0.1:8080/meetings";
+  
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +27,7 @@ class TestWrapperAppDashboard1 extends StatelessWidget {
 
     when(mockClient.get(Uri.parse(_backend))).thenAnswer((_) async =>
         http.Response(
-            '[{"title": "Meeting 1", "icon": "🚀", "start": "2023-01-01T10:00:00Z", "description": "Description 1", "maxVisitors": 10}, {"title": "Meeting 2", "icon": "🎉", "start": "2023-01-02T15:30:00Z", "description": "Description 2", "maxVisitors": 20, "costs": 8.0, "labels": ["Label 2"]}]',
+            '[{"id": 1, "title": "Titel1", "icon": "balloon", "start": "2007-03-01T13:00:00", "description": "description1", "maxVisitors": 10, "costs": 15.0, "labels": ["U18", "U16"], "visitors": [{"id": 1, "username": "user", "email": "user@mail.com", "password": "password", "createdEvents": []}], "creator": { "id": 2, "username": "creator", "email": "creator@mail.com", "password": "password", "createdEvents": [1]}}]',
             200));
 
     return MaterialApp(
@@ -32,7 +39,6 @@ class TestWrapperAppDashboard1 extends StatelessWidget {
 }
 
 class TestWrapperAppDashboard2 extends StatelessWidget {
-  static const _backend = "http://127.0.0.1:8080/meetings";
 
   @override
   Widget build(BuildContext context) {
@@ -49,14 +55,13 @@ class TestWrapperAppDashboard2 extends StatelessWidget {
   }
 }
 
-@GenerateMocks([http.Client])
 void main() {
   testWidgets('Dashboard displays meetings correctly', (tester) async {
     await tester.pumpWidget(TestWrapperAppDashboard1());
     expect(find.byType(Dashboard), findsOneWidget);
     await tester.pumpAndSettle();
     debugDumpApp();
-    expect(find.byType(Card), findsNWidgets(2));
+    expect(find.byType(Card), findsNWidgets(1));
     expect(find.byType(FloatingActionButton), findsOneWidget);
   });
 
@@ -69,4 +74,3 @@ void main() {
   });
 
 }
-

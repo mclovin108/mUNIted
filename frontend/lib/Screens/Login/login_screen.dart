@@ -156,7 +156,7 @@ class _LoginPageState extends State<LoginPage> {
                         },
                         child: const Text(
                           "Login",
-                          style: TextStyle(fontSize: 20),
+                          style: TextStyle(fontSize: 20, color: kPrimaryLightColor),
                         ),
                         style: ElevatedButton.styleFrom(
                           shape: const StadiumBorder(),

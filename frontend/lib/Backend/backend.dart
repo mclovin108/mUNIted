@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:http/http.dart' as http;
 import 'package:munited/model/meeting.dart';
@@ -8,23 +9,7 @@ class Backend {
   // use IP 10.0.2.2 to access localhost from windows client
   static const _backend = "http://127.0.0.1:8080/";
 
-  // use IP 10.0.2.2 to access localhost from emulator!
-  // static const _backend = "http://10.0.2.2:8080/";
 
-  // get meeting list from backend
-  Future<List<Meeting>> fetchMeetingList(http.Client client) async {
-    // access REST interface with get request
-    final response = await client.get(Uri.parse('${_backend}events'));
-
-    // check response from backend
-    if (response.statusCode == 200) {
-      return List<Meeting>.from(json
-          .decode(utf8.decode(response.bodyBytes))
-          .map((x) => Meeting.fromJson(x)));
-    } else {
-      throw Exception('Failed to load MeetingList');
-    }
-  }
 
   Future<User> createUser(http.Client client, String username, String email,
       String password, String confirmPassword) async {
@@ -146,7 +131,9 @@ class Backend {
     }
   }
 
-  Future<void> createMeeting(
+  // Event backend 
+
+  Future<Meeting> createEvent(
       http.Client client,
       String title,
       String icon,
@@ -175,7 +162,7 @@ class Backend {
           body: json.encode(data));
 
       if (response.statusCode == 200) {
-        print('Meeting created successfully');
+        return Meeting.fromJson(json.decode(utf8.decode(response.bodyBytes)));
       } else {
         print('Failed to create meeting. Status code: ${response.statusCode}');
         throw Exception('Failed to create meeting');
@@ -186,7 +173,66 @@ class Backend {
     }
   }
 
-Future<List<Meeting>> fetchEvents(http.Client client) async {
+  Future<Meeting> updateEvent(
+      http.Client client,
+      int id,
+      String title,
+      String icon,
+      DateTime start,
+      String description,
+      int? maxVisitors,
+      double? costs,
+      List<String>? labels,
+      User creator,
+      List<User>? visitors) async {
+
+    try {
+      Map<String, dynamic> data = {
+        'title': title,
+        'icon': icon,
+        'start': start.toUtc().toIso8601String(),
+        'description': description,
+        'maxVisitors': maxVisitors,
+        'costs': costs,
+        'labels': labels,
+        'creatorId': creator.id,
+        'visitors': visitors?.map((user) => user.toJson()).toList(),
+      };
+
+      // access REST interface with post request
+      var response = await client.put(Uri.parse('${_backend}events/$id'),
+          headers: <String, String>{'Content-Type': 'application/json'},
+          body: json.encode(data)
+      );
+
+      // check response from backend
+      if (response.statusCode == 200) {
+        return Meeting.fromJson(json.decode(utf8.decode(response.bodyBytes)));
+      } else {
+        print('Failed to update meeting. Status code: ${response.statusCode}');
+        throw Exception('Failed to update meeting');
+      }
+      } catch (e) {
+      print('Error updating event: $e');
+      throw Exception('Error updating event');
+    }
+  }
+
+  Future<void> deleteEvent(http.Client client, int id) async {
+
+      final response = await client.delete(Uri.parse('${_backend}events/$id'));
+
+      if (response.statusCode != 200) {
+        if (response.statusCode == 404) {
+          throw Exception('Event was not found');
+        } else {
+          throw Exception('Failed to delete event with id $id. Status code: ${response.statusCode}');
+        }
+      }
+      print('Event deleted');
+  }
+
+  Future<List<Meeting>> fetchEvents(http.Client client) async {
   try {
     final response = await client.get(Uri.parse('${_backend}events'));
 
@@ -208,9 +254,34 @@ Future<List<Meeting>> fetchEvents(http.Client client) async {
     } else {
       throw Exception('Failed to load events. Status code: ${response.statusCode}');
     }
-  } catch (e) {
-    print('Error fetching events: $e');
-    throw Exception('Failed to load events');
+    } catch (e) {
+      print('Error fetching events: $e');
+      throw Exception('Failed to load events');
+    }
   }
-}
+
+  Future<void> signUpToEvent(int eventId, int userId) async {
+    final response = await http.post(
+      Uri.parse('${_backend}events/$eventId/register/$userId'),
+    );
+
+    if (response.statusCode == 200) {
+      print('Signed up successfully');
+    } else {
+      print('Failed to sign up. Status code: ${response.statusCode}');
+    }
+  }
+
+  Future<void> signOffFromEvent(int eventId, int userId) async {
+    final response = await http.post(
+      Uri.parse('${_backend}events/$eventId/signoff/$userId'),
+    );
+
+    if (response.statusCode == 200) {
+      print('Signed off successfully');
+    } else {
+      print('Failed to sign off. Status code: ${response.statusCode}');
+    }
+  }
+
 }

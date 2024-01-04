@@ -1,6 +1,7 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:munited/Backend/backend.dart';
 import 'package:munited/constants.dart';
 import 'package:munited/model/meeting.dart';
@@ -45,8 +46,6 @@ class _EditMeetingPageState extends State<EditMeetingPage> {
   final TextEditingController _costsController = TextEditingController();
   final TextEditingController _labelsController = TextEditingController();
 
-   
-
   void _showEmojiPicker() {
     showDialog(
       context: context,
@@ -64,35 +63,33 @@ class _EditMeetingPageState extends State<EditMeetingPage> {
 
   @override
   Widget build(BuildContext context) {
-
     _titleController.text = _meeting.title;
     _iconController.text = _meeting.icon;
-    _startController.text = _meeting.start.toString();
     _startDateTime = _meeting.start;
+    _startController.text =
+        DateFormat('dd.MM.yy, HH:mm').format(_startDateTime);
     _descriptionController.text = _meeting.description;
     _maxVisitorsController.text = _meeting.maxVisitors.toString();
     _costsController.text = _meeting.costs.toString();
-    _labelsController.text = _meeting.labels.toString();
-
+    _labelsController.text = '';
+    if (!(_meeting.labels == null || _meeting.labels!.isEmpty)) {
+      _labelsController.text = _meeting.labels.toString();
+    }
+    ;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: kPrimaryDarkColor,
         title: const Text(
-          'Meeting erstellen',
+          'Meeting bearbeiten',
           style: TextStyle(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Righteous',
+            fontSize: 26,
           ),
         ),
-        leading: BackButton(
-          style: ButtonStyle(
-            backgroundColor: MaterialStatePropertyAll<Color>(kPrimaryLightColor),
-            alignment: Alignment.topLeft
-            ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        centerTitle: true,
+        foregroundColor: kPrimaryLightColor,
       ),
       body: SingleChildScrollView(
           child: Padding(
@@ -103,14 +100,6 @@ class _EditMeetingPageState extends State<EditMeetingPage> {
             children: <Widget>[
               Column(
                 children: <Widget>[
-                  const SizedBox(height: 15.0),
-                  const Text(
-                    "Meeting erstellen",
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
                   const SizedBox(
                     height: 20,
                   ),
@@ -125,7 +114,7 @@ class _EditMeetingPageState extends State<EditMeetingPage> {
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(18),
                         borderSide: BorderSide.none),
-                    fillColor: kPrimaryColor,
+                    fillColor: kPrimaryLightColor,
                     filled: true,
                     prefixIcon: const Icon(Icons.mail)),
                 validator: (value) {
@@ -145,7 +134,7 @@ class _EditMeetingPageState extends State<EditMeetingPage> {
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(18),
                       borderSide: BorderSide.none),
-                  fillColor: kPrimaryColor,
+                  fillColor: kPrimaryLightColor,
                   filled: true,
                   prefixIcon: IconButton(
                     icon: Icon(Icons.emoji_emotions),
@@ -185,7 +174,8 @@ class _EditMeetingPageState extends State<EditMeetingPage> {
                         selectedTime.hour,
                         selectedTime.minute,
                       );
-                      _startController.text = _startDateTime.toString();
+                      _startController.text =
+                          DateFormat('dd.MM.yy, HH:mm').format(_startDateTime);
                     }
                   }
                 },
@@ -198,7 +188,7 @@ class _EditMeetingPageState extends State<EditMeetingPage> {
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(18),
                             borderSide: BorderSide.none),
-                        fillColor: kPrimaryColor,
+                        fillColor: kPrimaryLightColor,
                         filled: true,
                         prefixIcon: const Icon(Icons.event)),
                     validator: (value) {
@@ -220,7 +210,7 @@ class _EditMeetingPageState extends State<EditMeetingPage> {
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(18),
                         borderSide: BorderSide.none),
-                    fillColor: kPrimaryColor,
+                    fillColor: kPrimaryLightColor,
                     filled: true,
                     prefixIcon: const Icon(Icons.event_note)),
                 validator: (value) {
@@ -239,7 +229,7 @@ class _EditMeetingPageState extends State<EditMeetingPage> {
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(18),
                         borderSide: BorderSide.none),
-                    fillColor: kPrimaryColor,
+                    fillColor: kPrimaryLightColor,
                     filled: true,
                     prefixIcon: const Icon(Icons.people)),
                 keyboardType: TextInputType.number,
@@ -253,7 +243,7 @@ class _EditMeetingPageState extends State<EditMeetingPage> {
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(18),
                         borderSide: BorderSide.none),
-                    fillColor: kPrimaryColor,
+                    fillColor: kPrimaryLightColor,
                     filled: true,
                     prefixIcon: const Icon(Icons.euro)),
                 keyboardType: TextInputType.number,
@@ -263,47 +253,76 @@ class _EditMeetingPageState extends State<EditMeetingPage> {
                 key: Key("labels"),
                 controller: _labelsController,
                 decoration: InputDecoration(
-                    hintText: "Labels",
+                    hintText: "Label",
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(18),
                         borderSide: BorderSide.none),
-                    fillColor: kPrimaryColor,
+                    fillColor: kPrimaryLightColor,
                     filled: true,
                     prefixIcon: const Icon(Icons.add_circle)),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    // Formular ist gültig, Meeting erstellen
-                    editMeeting();
-                    Navigator.pushNamed(context, '/dash');
-                  }
+                  editMeeting(_meeting.id);
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    backgroundColor: Colors.white,
+                                    title: Text("Meeting erfolgreich bearbeitet"),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                          Navigator.pop(context);
+                                          Navigator.pop(context);
+                                        },
+                                        child: Text('OK'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
                 },
-                child: Text('Meeting editieren'),
+                child: Text('Meeting bearbeiten'),
                 style: ElevatedButton.styleFrom(
                   shape: const StadiumBorder(),
                   padding:
                       const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
                   backgroundColor: kPrimaryDarkColor,
+                  foregroundColor: kPrimaryLightColor,
                 ),
               ),
             ],
           ),
         ),
       )),
+      backgroundColor: kPrimaryColor,
     );
   }
 
-  Future<void> editMeeting() async {
+  Future<void> editMeeting(int id) async {
     int? creatorId = context.read<UserProvider>().getUserId();
     // Überprüfen, ob der Benutzer eingeloggt ist
     if (creatorId != null) {
       User? creator = await _backend.getUserById(http.Client(), creatorId);
       if (creator != null) {
         try {
-          // Logik für Meeting Update
-
+          await _backend.updateEvent(
+              http.Client(),
+              id,
+              _titleController.text,
+              _iconController.text,
+              DateTime.parse(_startDateTime.toString()),
+              _descriptionController.text,
+              int.tryParse(_maxVisitorsController.text),
+              double.tryParse(_costsController.text),
+              _labelsController.text.isNotEmpty
+                  ? _labelsController.text.split(',')
+                  : null,
+              creator,
+              _meeting.visitors);
           print('Meeting updated successfully');
         } catch (e) {
           print('Failed to update meeting: $e');

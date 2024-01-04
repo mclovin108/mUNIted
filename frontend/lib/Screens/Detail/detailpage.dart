@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:munited/Screens/EditMeeting/edit_meeting_screen.dart';
+import 'package:munited/model/meeting.dart';
+import 'package:munited/model/user.dart';
+import 'package:munited/model/user_provider.dart';
+import 'package:provider/provider.dart';
 import '../../constants.dart';
 import '../../Backend/backend.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class Detail extends StatefulWidget {
   final Backend backend;
   final http.Client client;
+  Meeting meeting;
 
-  const Detail(this.backend, this.client);
+  Detail(this.backend, this.client, this.meeting);
 
   @override
   _DetailPageState createState() => _DetailPageState();
@@ -16,16 +23,33 @@ class Detail extends StatefulWidget {
 class _DetailPageState extends State<Detail> {
   late Backend _backend;
   late http.Client _client;
+  late Meeting _meeting;
+  late bool _isCreator;
 
   @override
   void initState() {
     super.initState();
     _backend = widget.backend;
     _client = widget.client;
+    _meeting = widget.meeting;
+    _isCreator =
+        _meeting.creator.id == context.read<UserProvider>().getUserId();
   }
 
   @override
   Widget build(BuildContext context) {
+    int AllVisitors = 0;
+    if (_meeting.visitors != null) {
+      AllVisitors = _meeting.visitors!.length;
+    }
+
+    bool isSignedUp = false;
+    int id = context.read<UserProvider>().getUserId()!;
+
+    for (User user in _meeting.visitors!) {
+      if (user.id == id) isSignedUp = true;
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: kPrimaryDarkColor,
@@ -58,9 +82,9 @@ class _DetailPageState extends State<Detail> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Event Title',
+                            _meeting.title,
                             style: TextStyle(
-                              fontSize: 26,
+                              fontSize: 40,
                               fontWeight: FontWeight.w500,
                               color: kPrimaryDarkColor,
                             ),
@@ -77,7 +101,7 @@ class _DetailPageState extends State<Detail> {
                                 alignment: Alignment.center,
                                 children: [
                                   Text(
-                                    '🏀',
+                                    _meeting.icon,
                                     style: TextStyle(fontSize: 35),
                                   ),
                                 ],
@@ -96,27 +120,21 @@ class _DetailPageState extends State<Detail> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Ersteller: John Doe',
+                                    'Ersteller: ${_meeting.creator.username}',
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 24,
                                       fontWeight: FontWeight.w500,
                                       color: kPrimaryDarkColor,
                                     ),
                                   ),
-                                  SizedBox(height: 8),
+                                  SizedBox(height: 16),
                                   Text(
-                                    'Kategorie: Sport',
+                                    'Teilnehmeranzahl: ' +
+                                        (_meeting.maxVisitors != 0
+                                            ? '$AllVisitors / ${_meeting.maxVisitors}'
+                                            : AllVisitors.toString()),
                                     style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: kPrimaryDarkColor,
-                                    ),
-                                  ),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    'Teilnehmeranzahl: 18 / 50',
-                                    style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 24,
                                       fontWeight: FontWeight.w500,
                                       color: kPrimaryDarkColor,
                                     ),
@@ -136,18 +154,18 @@ class _DetailPageState extends State<Detail> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
-                                    '14',
+                                    _meeting.start.day.toString(),
                                     style: TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.w500,
                                       color: kPrimaryLightColor,
                                     ),
                                   ),
-                                  SizedBox(height: 5),
+                                  SizedBox(height: 16),
                                   Text(
-                                    'Mai',
+                                    DateFormat('MMM').format(_meeting.start),
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 24,
                                       fontWeight: FontWeight.w500,
                                       color: kPrimaryLightColor,
                                     ),
@@ -160,9 +178,22 @@ class _DetailPageState extends State<Detail> {
                       ),
                       SizedBox(height: 16),
                       Text(
-                        'Ort: Lothstraße 34, 80335 München',
+                        'Startzeit: ' +
+                            DateFormat('HH:mm').format(_meeting.start) +
+                            ' Uhr',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w500,
+                          color: kPrimaryDarkColor,
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        _meeting.costs != null && _meeting.costs != 0
+                            ? 'Kosten: ${_meeting.costs} €'
+                            : 'Kostenlos',
+                        style: TextStyle(
+                          fontSize: 24,
                           fontWeight: FontWeight.w500,
                           color: kPrimaryDarkColor,
                         ),
@@ -171,36 +202,78 @@ class _DetailPageState extends State<Detail> {
                       Text(
                         'Beschreibung:',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 24,
                           fontWeight: FontWeight.w500,
                           color: kPrimaryDarkColor,
                         ),
                       ),
                       SizedBox(height: 8),
                       Text(
-                        'Hier steht eine ausführliche Beschreibung des Events. Zum Beispiel Informationen über den Ort, die Zeit und weitere Details.',
+                        _meeting.description,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 24,
                           color: kPrimaryDarkColor,
                         ),
                       ),
                       SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          // TODO: Implementiere die Anmeldung
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: kPrimaryDarkColor,
-                          foregroundColor: kPrimaryLightColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                      if (_meeting.visitors!.length < _meeting.maxVisitors! ||
+                          _meeting.maxVisitors! == 0) ...[
+                        Row(
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                if (!isSignedUp) {
+                                  _backend.signUpToEvent(_meeting.id,
+                                      context.read<UserProvider>().userId!);
+                                  _showAlertDialog("Sie haben sich angemeldet");
+                                } else {
+                                  _backend.signOffFromEvent(_meeting.id,
+                                      context.read<UserProvider>().userId!);
+                                  _showAlertDialog("Sie haben sich abgemeldet");
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: kPrimaryDarkColor,
+                                foregroundColor: kPrimaryLightColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Text(
+                                  isSignedUp ? 'Abmelden' : 'Anmelden',
+                                ),
+                              ),
+                            ),
+                            if (_isCreator) ...[
+                              SizedBox(width: 8), // Add spacing between buttons
+                              IconButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => EditMeetingPage(_backend, _client, _meeting)),
+                              );
+                                },
+                                icon: Icon(Icons.edit),
+                                color:
+                                    kPrimaryDarkColor,
+                              ),
+                              SizedBox(width: 8), // Add spacing between buttons
+                              IconButton(
+                                onPressed: () {
+                                  _backend.deleteEvent(_client, _meeting.id);
+                                  _showAlertDialog("Das Event wurde erfolgreich gelöscht");
+
+                                },
+                                icon: Icon(Icons.delete),
+                                color:
+                                    kPrimaryDarkColor,
+                              ),
+                            ],
+                          ],
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text('Anmelden'),
-                        ),
-                      ),
+                      ],
                     ],
                   ),
                 ),
@@ -211,6 +284,27 @@ class _DetailPageState extends State<Detail> {
         ),
       ),
       backgroundColor: kPrimaryColor,
+    );
+  }
+
+  void _showAlertDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
