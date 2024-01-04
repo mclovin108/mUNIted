@@ -6,6 +6,7 @@ import 'package:munited/Screens/CreateMeeting/create_meeting.dart';
 import 'package:munited/Screens/Dashboard/dashboard.dart';
 import 'package:munited/Screens/Detail/detail_screen.dart';
 import 'package:munited/Screens/Login/login_screen.dart';
+import 'package:munited/model/meeting.dart';
 import 'Screens/Signup/signup_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:munited/model/user_provider.dart';
@@ -27,12 +28,13 @@ class MyApp extends StatelessWidget {
       create: (context) => UserProvider(),
       child: MaterialApp(
         title: 'mUNIted App',
-        initialRoute: '/dash', // Set the initial route
+        initialRoute: '/login', // Set the initial route
         routes: {
           '/signup': (context) => SignupPage(Backend(), http.Client()),
           '/dash': (context) => Dashboard(Backend(), http.Client()),
           '/login': (context) => LoginPage(Backend(), http.Client()),
           '/create': (context) => CreateMeetingPage(Backend(), http.Client()),
+          '/detail': (context) => Detail(Backend(), http.Client(), meeting: ModalRoute.of(context)!.settings.arguments as Meeting),
         },
       ),
     );

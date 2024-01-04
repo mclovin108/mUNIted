@@ -106,8 +106,8 @@ class _SignupPageState extends State<SignupPage> {
                               filled: true,
                               prefixIcon: const Icon(Icons.person)),
                           validator: (text) {
-                            if (text == null || text.isEmpty) {
-                              return 'Error: Bitte Benutzername eingeben';
+                            if (text == null || text.isEmpty || text.length < 5) {
+                              return 'Error: Bitte Benutzername mit mindestens 5 Zeichen eingeben';
                             }
                             return null;
                           }),
@@ -126,8 +126,8 @@ class _SignupPageState extends State<SignupPage> {
                               filled: true,
                               prefixIcon: const Icon(Icons.mail)),
                           validator: (text) {
-                            if (text == null || text.isEmpty) {
-                              return 'Error: Bitte E-Mail eingeben';
+                            if (text == null || text.isEmpty || !text.contains('@') || !text.contains('.')) {
+                              return 'Error: Bitte korrekte E-Mail angeben';
                             }
                             return null;
                           }),
@@ -147,8 +147,8 @@ class _SignupPageState extends State<SignupPage> {
                               filled: true,
                               prefixIcon: const Icon(Icons.key)),
                           validator: (text) {
-                            if (text == null || text.isEmpty) {
-                              return 'Error: Bitte Passwort eingeben';
+                            if (text == null || text.isEmpty || text.length < 8) {
+                              return 'Error: Bitte Passwort mit mindestens 8 Zeichen eingeben';
                             }
                             return null;
                           }),
