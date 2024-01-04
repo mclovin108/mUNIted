@@ -63,7 +63,7 @@ class Meeting {
     var map = {
       "title": title,
       "icon": icon,
-      "start": start.toUtc().toIso8601String(),
+      "start": start.toIso8601String(),
       "description": description,
       "creatorId": creator.id.toString(),
     };
