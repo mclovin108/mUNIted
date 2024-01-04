@@ -102,6 +102,9 @@ public class EventController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+        if(user.getSignedUpEvents() == null) {
+            user.setSignedUpEvents(new HashSet<>());
+        }
         if (!user.getSignedUpEvents().contains(event)) {
             user.getSignedUpEvents().add(event);
             userRepository.save(user);
@@ -127,6 +130,9 @@ public class EventController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+        if(user.getSignedUpEvents() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not signed up to this event");
+        }
         if (user.getSignedUpEvents().contains(event)) {
             user.getSignedUpEvents().remove(event);
             userRepository.save(user);
