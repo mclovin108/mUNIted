@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -43,18 +44,11 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(name = "registrations",
-    joinColumns = {
-            @JoinColumn(name = "user_id", referencedColumnName = "id")
-    },
-    inverseJoinColumns = {
-            @JoinColumn(name = "event_id", referencedColumnName = "id")
-    })
+    @ManyToMany(mappedBy = "visitors")
     @JsonIgnore
-    private Set<Event> signedUpEvents;
+    private Set<Event> signedUpEvents = new HashSet<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "creator", fetch = FetchType.EAGER)
-    private Set<Event> createdEvents;
+    private Set<Event> createdEvents = new HashSet<>();
 }

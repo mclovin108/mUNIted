@@ -1,13 +1,10 @@
 package com.munited.munited.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -27,7 +24,8 @@ public class Event {
     /**
      * Eindeutige ID des Events. Wird von der Datenbank generiert.
      */
-    private @Id @GeneratedValue Long id;
+    private @Id
+    @GeneratedValue Long id;
 
     /**
      * Titel eines Events.
@@ -69,12 +67,17 @@ public class Event {
      * Optionale Labels des Events.
      */
     @ElementCollection
-    @CollectionTable(name="labels_events")
+    @CollectionTable(name = "labels_events")
     @Column(nullable = true)
     private List<String> labels;
 
-    @ManyToMany(mappedBy = "signedUpEvents", fetch = FetchType.EAGER)
-    private Set<User> visitors;
+    @ManyToMany
+    @JoinTable(
+            name = "registrations",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> visitors = new HashSet<>();
 
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
     private User creator;

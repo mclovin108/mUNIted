@@ -5,6 +5,7 @@ import com.munited.munited.database.EventRepository;
 import com.munited.munited.database.UserRepository;
 import com.munited.munited.model.Event;
 import com.munited.munited.model.User;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * EventController repräsentiert den Controller, der Events verwaltet.
@@ -80,13 +82,12 @@ public class EventController {
     }
 
     @DeleteMapping("/events/{id}")
+    @Transactional
     public void deleteById(@PathVariable("id") Long id) {
-        if (!eventRepository.existsById(id)) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Event not found"
-            );
-        }
-        eventRepository.deleteById(id);
+        Event event = eventRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Event not found"
+        ));
+        eventRepository.delete(event);
     }
 
     /**
@@ -102,19 +103,9 @@ public class EventController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
-        if(user.getSignedUpEvents() == null) {
-            user.setSignedUpEvents(new HashSet<>());
-        }
-        if (!user.getSignedUpEvents().contains(event)) {
-            user.getSignedUpEvents().add(event);
-            userRepository.save(user);
-            if (event.getVisitors() == null) {
-                event.setVisitors(new HashSet<>());
-            }
-            event.getVisitors().add(user);
-            eventRepository.save(event);
-        }
-        return event;
+        Set<User> newVisitors = event.getVisitors();
+        newVisitors.add(user);
+        return eventRepository.save(event);
     }
 
     /**
@@ -130,18 +121,8 @@ public class EventController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
-        if(user.getSignedUpEvents() == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not signed up to this event");
-        }
-        if (user.getSignedUpEvents().contains(event)) {
-            user.getSignedUpEvents().remove(event);
-            userRepository.save(user);
-            if (event.getVisitors() == null) {
-                event.setVisitors(new HashSet<>());
-            }
-            event.getVisitors().remove(user);
-            eventRepository.save(event);
-        }
-        return event;
+        Set<User> newVisitors = event.getVisitors();
+        newVisitors.remove(user);
+        return eventRepository.save(event);
     }
 }
