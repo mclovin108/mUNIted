@@ -260,27 +260,35 @@ class Backend {
     }
   }
 
-  Future<void> signUpToEvent(int eventId, int userId) async {
-    final response = await http.post(
+  Future<void> signUpToEvent(http.Client client, int eventId, int userId) async {
+    final response = await client.post(
       Uri.parse('${_backend}events/$eventId/register/$userId'),
     );
 
     if (response.statusCode == 200) {
       print('Signed up successfully');
     } else {
-      print('Failed to sign up. Status code: ${response.statusCode}');
+      if (response.statusCode == 404) {
+        throw Exception('Event was not found');
+      } else {
+        throw Exception('Failed to sign up. Status code: ${response.statusCode}');
+      }
     }
   }
 
-  Future<void> signOffFromEvent(int eventId, int userId) async {
-    final response = await http.post(
+  Future<void> signOffFromEvent(http.Client client, int eventId, int userId) async {
+    final response = await client.post(
       Uri.parse('${_backend}events/$eventId/signoff/$userId'),
     );
 
     if (response.statusCode == 200) {
       print('Signed off successfully');
     } else {
-      print('Failed to sign off. Status code: ${response.statusCode}');
+      if (response.statusCode == 404) {
+        throw Exception('Event was not found');
+      } else {
+        throw Exception('Failed to sign off. Status code: ${response.statusCode}');
+      }
     }
   }
 

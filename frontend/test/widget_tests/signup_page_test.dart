@@ -288,9 +288,9 @@ void main() {
     await tester.tap(find.byType(ElevatedButton));
     await tester.pump(const Duration(milliseconds: 100));
     final textFormField = find.byKey(Key("username"));
-    final textFinder = find.text('Error: Bitte Benutzername eingeben');
+    final textFinder = find.text('Error: Bitte Benutzername mit mindestens 5 Zeichen eingeben');
     final validationMessageFinder = find.descendant(of: textFormField, matching: textFinder).first.evaluate().single.widget as Text;
-    expect(validationMessageFinder.data, 'Error: Bitte Benutzername eingeben');
+    expect(validationMessageFinder.data, 'Error: Bitte Benutzername mit mindestens 5 Zeichen eingeben');
   });
 
   testWidgets('Test: Validation text for empty email is present', (tester) async {
@@ -302,9 +302,9 @@ void main() {
     await tester.tap(find.byType(ElevatedButton));
     await tester.pump(const Duration(milliseconds: 100));
     final textFormField = find.byKey(Key("email"));
-    final textFinder = find.text('Error: Bitte E-Mail eingeben');
+    final textFinder = find.text('Error: Bitte korrekte E-Mail angeben');
     final validationMessageFinder = find.descendant(of: textFormField, matching: textFinder).first.evaluate().single.widget as Text;
-    expect(validationMessageFinder.data, 'Error: Bitte E-Mail eingeben');
+    expect(validationMessageFinder.data, 'Error: Bitte korrekte E-Mail angeben');
   });
 
   testWidgets('Test: Validation text for empty password is present', (tester) async {
@@ -316,9 +316,9 @@ void main() {
     await tester.tap(find.byType(ElevatedButton));
     await tester.pump(const Duration(milliseconds: 100));
     final textFormField = find.byKey(Key("password"));
-    final textFinder = find.text('Error: Bitte Passwort eingeben');
+    final textFinder = find.text('Error: Bitte Passwort mit mindestens 8 Zeichen eingeben');
     final validationMessageFinder = find.descendant(of: textFormField, matching: textFinder).first.evaluate().single.widget as Text;
-    expect(validationMessageFinder.data, 'Error: Bitte Passwort eingeben');
+    expect(validationMessageFinder.data, 'Error: Bitte Passwort mit mindestens 8 Zeichen eingeben');
   });
 
   testWidgets('Test: Validation text for empty confirm password is present', (tester) async {

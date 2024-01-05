@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:munited/Backend/backend.dart';
 import 'package:munited/Screens/CreateMeeting/create_meeting.dart';
 import 'package:munited/Screens/Dashboard/dashboard.dart';
-import 'package:munited/Screens/Detail/detail_screen.dart';
 import 'package:munited/Screens/Detail/detailpage.dart';
 import 'package:munited/Screens/Login/login_screen.dart';
 import 'package:munited/model/meeting.dart';

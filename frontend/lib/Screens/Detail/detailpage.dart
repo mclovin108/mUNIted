@@ -223,11 +223,11 @@ class _DetailPageState extends State<Detail> {
                             ElevatedButton(
                               onPressed: () {
                                 if (!isSignedUp) {
-                                  _backend.signUpToEvent(_meeting.id,
+                                  _backend.signUpToEvent(_client, _meeting.id,
                                       context.read<UserProvider>().userId!);
                                   _showAlertDialog("Sie haben sich angemeldet");
                                 } else {
-                                  _backend.signOffFromEvent(_meeting.id,
+                                  _backend.signOffFromEvent(_client, _meeting.id,
                                       context.read<UserProvider>().userId!);
                                   _showAlertDialog("Sie haben sich abgemeldet");
                                 }
