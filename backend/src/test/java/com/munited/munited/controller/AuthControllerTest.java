@@ -10,17 +10,17 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Example;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -62,6 +62,161 @@ public class AuthControllerTest {
         mockClosable.close();
     }
 
+    @Test
+    public void testRegister33() {
+        given(repository.save(any(User.class))).willReturn(user);
+
+        User createdUser = authController.register(registerBody);
+
+        assertEquals(createdUser.getEmail(), user.getEmail());
+        assertEquals(createdUser.getPassword(), user.getPassword());
+        assertEquals(createdUser.getUsername(), user.getUsername());
+        assertEquals(1, createdUser.getId());
+
+        verify(repository, times(1)).save(any(User.class));
+    }
+
+
+    @Test
+    public void testRegister34() {
+        when(repository.save(any(User.class))).thenReturn(new User());
+        authController.register(registerBody);
+
+        when(repository.save(any(User.class))).thenThrow(DataIntegrityViolationException.class);
+
+        RegisterBody secondRegisterBody = new RegisterBody("thomas", registerBody.getEmail(), "bla");
+        assertThrows(DataIntegrityViolationException.class, () -> {
+            authController.register(secondRegisterBody);
+        });
+    }
+
+    @Test
+    public void testLogin37() {
+        given(repository.findAll(any(Example.class))).willReturn(Collections.singletonList(user));
+
+        User loggedInUser = authController.login(loginBody);
+
+        assertEquals(loggedInUser.getEmail(), user.getEmail());
+        assertEquals(loggedInUser.getPassword(), user.getPassword());
+        assertEquals(loggedInUser.getUsername(), user.getUsername());
+        assertEquals(1, loggedInUser.getId());
+
+        verify(repository, times(1)).findAll(any(Example.class));
+    }
+
+    @Test
+    public void testLogin38() {
+        given(repository.findAll(any(Example.class))).willReturn(Collections.emptyList());
+
+        assertThrows(ResponseStatusException.class, () -> {
+            authController.login(loginBody);
+        });
+
+        verify(repository, times(1)).findAll(any(Example.class));
+    }
+
+    @Test
+    public void testGetUserById39() {
+        given(repository.findById(any(Long.class))).willReturn(Optional.of(user));
+
+        User foundUser = authController.getUserById(1L);
+
+        assertEquals(foundUser.getEmail(), user.getEmail());
+        assertEquals(foundUser.getPassword(), user.getPassword());
+        assertEquals(foundUser.getUsername(), user.getUsername());
+        assertEquals(1, foundUser.getId());
+
+        verify(repository, times(1)).findById(any(Long.class));
+    }
+
+
+    @Test
+    public void testGetUserById40() {
+        given(repository.findById(any(Long.class))).willReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class, () -> {
+            authController.getUserById(1L);
+        });
+
+        verify(repository, times(1)).findById(any(Long.class));
+    }
+
+
+    @Test
+    public void testGetUserById41() {
+        given(repository.findById(any(Long.class))).willReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class, () -> {
+            authController.getUserById(-10L);
+        });
+
+        verify(repository, times(0)).findById(any(Long.class));
+    }
+
+
+    @Test
+    public void testGetUserById42() {
+        given(repository.findById(any(Long.class))).willReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class, () -> {
+            authController.getUserById(null);
+        });
+
+        verify(repository, times(0)).findById(any(Long.class));
+    }
+
+
+    @Test
+    public void testGetUserById43() {
+        given(repository.findById(any(Long.class))).willReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class, () -> {
+            authController.getUserById(-1L);
+        });
+
+        verify(repository, times(0)).findById(any(Long.class));
+    }
+    @Test
+    public void testGetUsers44() {
+        ArrayList<User> l = new ArrayList<>();
+        l.add(user);
+        l.add(user);
+        given(repository.findAll()).willReturn(l);
+
+        List<User> users = authController.getUsers();
+
+        assertEquals(2, users.size());
+        assertEquals(user, l.getFirst());
+        assertEquals(user, l.getLast());
+
+        verify(repository, times(1)).findAll();
+    }
+
+    @Test
+    public void testGetUsers45() {
+        given(repository.findAll()).willReturn(Collections.emptyList());
+        List<User> users = authController.getUsers();
+
+        assertEquals(0, users.size());
+
+        verify(repository, times(1)).findAll();
+    }
+
+
+    @Test
+    public void testGetUsers46() {
+        ArrayList<User> l = new ArrayList<>();
+        l.add(user);
+        given(repository.findAll()).willReturn(l);
+
+        List<User> users = authController.getUsers();
+
+        assertEquals(1, users.size());
+        assertEquals(user, l.getFirst());
+
+        verify(repository, times(1)).findAll();
+    }
+/*
     @Test
     public void testRegister() {
         given(repository.save(any(User.class))).willReturn(user);
@@ -144,4 +299,5 @@ public class AuthControllerTest {
 
         verify(repository, times(1)).findAll();
     }
+    */
 }

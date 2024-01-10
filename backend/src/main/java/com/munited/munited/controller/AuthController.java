@@ -46,6 +46,11 @@ public class AuthController {
 
     @GetMapping("/users/{id}")
      User getUserById(@PathVariable("id") Long id) {
+         if(id == null || id < 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Invalid id"
+            );
+        }
         return userRepository
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
