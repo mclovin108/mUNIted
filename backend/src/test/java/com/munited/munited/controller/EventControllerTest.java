@@ -68,6 +68,7 @@ public class EventControllerTest {
 
         event = new Event();
         event.setTitle("title");
+        event.setId(1L);
         event.setIcon("icon");
         event.setStart(LocalDateTime.of(2023, Month.JANUARY, 12, 05, 50));
         event.setDescription("description");
@@ -83,67 +84,127 @@ public class EventControllerTest {
     }
 
     @Test
-    public void testAllEvents() {
-        given(eventRepository.findAll()).willReturn(Collections.singletonList(event));
-
+    public void testAllEvents1() {
+        given(eventRepository.findAll()).willReturn(Collections.emptyList());
         List<Event> allEvents = eventController.allEvents();
-
+        assertEquals(0, allEvents.size());
+        verify(eventRepository, times(1)).findAll();
+    }
+    @Test
+    public void testAllEvents2() {
+        ArrayList<Event> toReturn = new ArrayList<>();
+        toReturn.add(event);
+        toReturn.add(event);
+        given(eventRepository.findAll()).willReturn(toReturn);
+        List<Event> allEvents = eventController.allEvents();
+        assertEquals(2, allEvents.size());
+        assertEquals(event, allEvents.getFirst());
+        assertEquals(event, allEvents.get(1));
+        verify(eventRepository, times(1)).findAll();
+    }@Test
+    public void testAllEvents3() {
+        ArrayList<Event> toReturn = new ArrayList<>();
+        toReturn.add(event);
+        given(eventRepository.findAll()).willReturn(toReturn);
+        List<Event> allEvents = eventController.allEvents();
         assertEquals(1, allEvents.size());
         assertEquals(event, allEvents.getFirst());
-
         verify(eventRepository, times(1)).findAll();
     }
 
     @Test
-    public void testGetEvent() {
-        given(eventRepository.findById(any(Long.class))).willReturn(Optional.of(event));
-
-        Event foundEvent = eventController.getEvent(1L);
-
-        assertEquals(event, foundEvent);
-
-        verify(eventRepository, times(1)).findById(any(Long.class));
+    public void testGetEvent4() {
+        given(eventRepository.findById(1L)).willReturn(Optional.of(event));
+        Event result = eventController.getEvent(1L);
+        assertEquals(event, result);
+        verify(eventRepository).findById(1L);
     }
 
     @Test
-    public void testGetEventNotFound() {
-        given(eventRepository.findById(any(Long.class))).willReturn(Optional.empty());
+    public void testGetEvent5() {
+        when(eventRepository.findById(1L)).thenReturn(Optional.empty());
 
-        Throwable thrown = catchThrowable(() -> eventController.getEvent(1L));
+        assertThrows(ResponseStatusException.class, () -> {
+            eventController.getEvent(1L);
+        });
 
-        assertInstanceOf(ResponseStatusException.class, thrown);
-        assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) thrown).getStatusCode());
+        verify(eventRepository).findById(1L);
+    }
 
-        verify(eventRepository, times(1)).findById(any(Long.class));
+
+    @Test
+    public void testGetEvent6() {
+        assertThrows(ResponseStatusException.class, () -> {
+            eventController.getEvent(-5L);
+        });
+
+        verify(eventRepository, never()).findById(-5L);
     }
 
     @Test
-    public void testCreateEvent() {
+    public void testGetEvent7() {
+        assertThrows(ResponseStatusException.class, () -> {
+            eventController.getEvent(null);
+        });
+        verify(eventRepository, never()).findById(any());
+    }
+    @Test
+    public void testGetEvent8() {
+        assertThrows(ResponseStatusException.class, () -> {
+            eventController.getEvent(-1L);
+        });
+
+        verify(eventRepository, never()).findById(-1L);
+    }
+
+    @Test
+    public void postEvent9() {
         given(userRepository.findById(any(Long.class))).willReturn(Optional.of(user));
-        given(eventRepository.save(event)).willReturn(event);
+        given(eventRepository.save(any(Event.class))).willReturn(event);
 
         Event createdEvent = eventController.createEvent(body);
 
         assertEquals(event, createdEvent);
 
-        verify(eventRepository, times(1)).save(any(Event.class));
+        verify(eventRepository).save(any(Event.class));
     }
 
     @Test
-    public void testCreateEventUserNotFound() {
+    public void postEvent10() {
         given(userRepository.findById(any(Long.class))).willReturn(Optional.empty());
-        given(eventRepository.save(event)).willReturn(event);
+        given(eventRepository.save(any(Event.class))).willReturn(event);
 
         Throwable thrown = catchThrowable(() -> eventController.createEvent(body));
-
-        assertInstanceOf(ResponseStatusException.class, thrown);
         assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) thrown).getStatusCode());
 
-        verify(eventRepository, times(0)).save(any(Event.class));
+        verify(eventRepository, never()).save(any(Event.class));
     }
 
     @Test
-    public void testReplaceEvent() {
+    public void postEvent11() {
+        given(userRepository.findById(any(Long.class))).willReturn(Optional.empty());
+        given(eventRepository.save(any(Event.class))).willReturn(event);
+        EventBody modified = body;
+        modified.setCreatorId(-1L);
+        Throwable thrown = catchThrowable(() -> eventController.createEvent(modified));
+        assertEquals(HttpStatus.BAD_REQUEST, ((ResponseStatusException) thrown).getStatusCode());
+
+        verify(eventRepository, never()).save(any(Event.class));
+    }
+
+    @Test
+    public void postEvent12() {
+        given(userRepository.findById(any(Long.class))).willReturn(Optional.empty());
+        given(eventRepository.save(any(Event.class))).willReturn(event);
+        EventBody modified = body;
+        modified.setCreatorId(null);
+        Throwable thrown = catchThrowable(() -> eventController.createEvent(modified));
+        assertEquals(HttpStatus.BAD_REQUEST, ((ResponseStatusException) thrown).getStatusCode());
+
+        verify(eventRepository, never()).save(any(Event.class));
+    }
+    @Test
+    public void testReplaceEvent13() {
         given(eventRepository.findById(any(Long.class))).willReturn(Optional.of(event));
         given(eventRepository.save(any(Event.class))).willReturn(event);
 
@@ -162,7 +223,7 @@ public class EventControllerTest {
     }
 
     @Test
-    public void testReplaceEventNotFound() {
+    public void testReplaceEvent14() {
         given(eventRepository.findById(any(Long.class))).willReturn(Optional.empty());
 
         Throwable thrown = catchThrowable(() -> eventController.replaceEvent(body, 1L));
@@ -170,36 +231,86 @@ public class EventControllerTest {
         assertInstanceOf(ResponseStatusException.class, thrown);
         assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) thrown).getStatusCode());
 
-        verify(eventRepository, times(1)).findById(any(Long.class));
+        verify(eventRepository).findById(any(Long.class));
+    }
+
+
+    @Test
+    public void testReplaceEvent15() {
+        given(eventRepository.findById(any(Long.class))).willReturn(Optional.empty());
+
+        Throwable thrown = catchThrowable(() -> eventController.replaceEvent(body, -1L));
+
+        assertInstanceOf(ResponseStatusException.class, thrown);
+        assertEquals(HttpStatus.BAD_REQUEST, ((ResponseStatusException) thrown).getStatusCode());
+
+        verify(eventRepository, times(0)).findById(any(Long.class));
     }
 
     @Test
-    public void testDeleteById() {
-        given(eventRepository.existsById(any(Long.class))).willReturn(true);
+    public void testReplaceEvent16() {
+        given(eventRepository.findById(any(Long.class))).willReturn(Optional.empty());
+
+        Throwable thrown = catchThrowable(() -> eventController.replaceEvent(body, null));
+
+        assertInstanceOf(ResponseStatusException.class, thrown);
+        assertEquals(HttpStatus.BAD_REQUEST, ((ResponseStatusException) thrown).getStatusCode());
+
+        verify(eventRepository, times(0)).findById(any(Long.class));
+    }
+
+
+    @Test
+    public void testDeleteById17() {
+        given(eventRepository.findById(1L)).willReturn(Optional.of(event));
 
         eventController.deleteById(1L);
 
-        verify(eventRepository, times(1)).deleteById(any(Long.class));
+        verify(eventRepository, times(1)).delete(any(Event.class));
     }
 
 
     @Test
-    public void testDeleteByIdNotFound() {
-        given(eventRepository.existsById(any(Long.class))).willReturn(false);
+    public void testDeleteById18() {
+        given(eventRepository.findById(1L)).willReturn(Optional.empty());
 
         Throwable thrown = catchThrowable(() -> eventController.deleteById(1L));
 
         assertInstanceOf(ResponseStatusException.class, thrown);
         assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) thrown).getStatusCode());
 
-        verify(eventRepository, times(0)).deleteById(any(Long.class));
+        verify(eventRepository, times(0)).delete(any(Event.class));
     }
 
     @Test
-    public void testSignUpToEvent() {
+    public void testDeleteById19() {
+        given(eventRepository.findById(-1L)).willReturn(Optional.empty());
+
+        Throwable thrown = catchThrowable(() -> eventController.deleteById(-1L));
+
+        assertInstanceOf(ResponseStatusException.class, thrown);
+        assertEquals(HttpStatus.BAD_REQUEST, ((ResponseStatusException) thrown).getStatusCode());
+
+        verify(eventRepository, times(0)).delete(any(Event.class));
+    }
+
+
+    @Test
+    public void testDeleteById20() {
+        given(eventRepository.findById(any(Long.class))).willReturn(Optional.empty());
+
+        Throwable thrown = catchThrowable(() -> eventController.deleteById(null));
+
+        assertInstanceOf(ResponseStatusException.class, thrown);
+        assertEquals(HttpStatus.BAD_REQUEST, ((ResponseStatusException) thrown).getStatusCode());
+
+        verify(eventRepository, times(0)).delete(any(Event.class));
+    }
+
+    @Test
+    public void testSignUpToEvent21() {
         given(eventRepository.findById(1L)).willReturn(Optional.of(event));
         given(userRepository.findById(1L)).willReturn(Optional.of(user));
-        given(userRepository.save(user)).willReturn(user);
         Event eventWithUser = event;
         HashSet<User> set = new HashSet<>();
         set.add(user);
@@ -212,122 +323,208 @@ public class EventControllerTest {
 
         verify(eventRepository, times(1)).findById(1L);
         verify(userRepository, times(1)).findById(1L);
-        verify(userRepository, times(1)).save(user);
         verify(eventRepository, times(1)).save(event);
     }
 
+
     @Test
-    public void testSignUpToEventAlreadySignedUp() {
-        //Construct event that already has a visitor
+    public void testSignUpToEvent22() {
+        given(eventRepository.findById(1L)).willReturn(Optional.empty());
+
+        Throwable thrown = catchThrowable(() -> eventController.signUpToEvent(1L, 1L));
+
+        assertInstanceOf(ResponseStatusException.class, thrown);
+        assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) thrown).getStatusCode());
+
+        verify(eventRepository, times(1)).findById(1L);
+        verify(userRepository, times(0)).findById(1L);
+        verify(eventRepository, times(0)).save(event);
+    }
+
+
+    @Test
+    public void testSignUpToEvent23() {
+        given(eventRepository.findById(1L)).willReturn(Optional.of(event));
+        given(userRepository.findById(1L)).willReturn(Optional.empty());
+
+        Throwable thrown = catchThrowable(() -> eventController.signUpToEvent(1L, 1L));
+
+        assertInstanceOf(ResponseStatusException.class, thrown);
+        assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) thrown).getStatusCode());
+
+        verify(eventRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).findById(1L);
+        verify(eventRepository, times(0)).save(event);
+    }
+
+    @Test
+    public void testSignUpToEvent24() {
+        given(eventRepository.findById(1L)).willReturn(Optional.of(event));
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+
+        Throwable thrown = catchThrowable(() -> eventController.signUpToEvent(-1L, -1L));
+
+        assertInstanceOf(ResponseStatusException.class, thrown);
+        assertEquals(HttpStatus.BAD_REQUEST, ((ResponseStatusException) thrown).getStatusCode());
+
+        verify(eventRepository, times(0)).findById(1L);
+        verify(userRepository, times(0)).findById(1L);
+        verify(eventRepository, times(0)).save(event);
+    }
+
+    @Test
+    public void testSignUpToEvent25() {
+        given(eventRepository.findById(1L)).willReturn(Optional.of(event));
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+
+        Throwable thrown = catchThrowable(() -> eventController.signUpToEvent(null, null));
+
+        assertInstanceOf(ResponseStatusException.class, thrown);
+        assertEquals(HttpStatus.BAD_REQUEST, ((ResponseStatusException) thrown).getStatusCode());
+
+        verify(eventRepository, times(0)).findById(1L);
+        verify(userRepository, times(0)).findById(1L);
+        verify(eventRepository, times(0)).save(event);
+    }
+
+    @Test
+    public void testSignUpToEvent26() {
+        given(eventRepository.findById(1L)).willReturn(Optional.of(event));
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+
+        Throwable thrown = catchThrowable(() -> eventController.signUpToEvent(1L, null));
+
+        assertInstanceOf(ResponseStatusException.class, thrown);
+        assertEquals(HttpStatus.BAD_REQUEST, ((ResponseStatusException) thrown).getStatusCode());
+
+        verify(eventRepository, times(0)).findById(1L);
+        verify(userRepository, times(0)).findById(1L);
+        verify(eventRepository, times(0)).save(event);
+    }
+
+    @Test
+    public void testSignUpToEvent27() {
+        given(eventRepository.findById(1L)).willReturn(Optional.of(event));
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+
+        Throwable thrown = catchThrowable(() -> eventController.signUpToEvent(1L, -1L));
+
+        assertInstanceOf(ResponseStatusException.class, thrown);
+        assertEquals(HttpStatus.BAD_REQUEST, ((ResponseStatusException) thrown).getStatusCode());
+
+        verify(eventRepository, times(0)).findById(1L);
+        verify(userRepository, times(0)).findById(1L);
+        verify(eventRepository, times(0)).save(event);
+    }
+
+    @Test
+    public void testSignOffFromEvent28() {
+        given(eventRepository.findById(1L)).willReturn(Optional.of(event));
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
         Event eventWithUser = event;
         HashSet<User> set = new HashSet<>();
         set.add(user);
         eventWithUser.setVisitors(set);
-        //Construct user that already visits one event
-        User userWithEvent = user;
-        HashSet<Event> eventSet = new HashSet<>();
-        eventSet.add(eventWithUser);
-        userWithEvent.setSignedUpEvents(eventSet);
-
-        given(userRepository.findById(1L)).willReturn(Optional.of(userWithEvent));
-        given(userRepository.save(any(User.class))).willReturn(userWithEvent);
-        given(eventRepository.findById(1L)).willReturn(Optional.of(eventWithUser));
         given(eventRepository.save(any(Event.class))).willReturn(eventWithUser);
 
-        Event signedUpEvent = eventController.signUpToEvent(1L, 1L);
+        Event signedUpEvent = eventController.signOffFromEvent(1L, 1L);
 
-        assertTrue(signedUpEvent.getVisitors().contains(user));
-        assertEquals(1, signedUpEvent.getVisitors().size());
-
-        verify(eventRepository, times(1)).findById(1L);
-        verify(userRepository, times(1)).findById(1L);
-        verify(userRepository, times(0)).save(any(User.class));
-        verify(eventRepository, times(0)).save(any(Event.class));
-    }
-
-    @Test
-    public void testSignUpToEventNoVisitors() {
-        given(userRepository.findById(1L)).willReturn(Optional.of(user));
-        given(userRepository.save(any(User.class))).willReturn(user);
-        given(eventRepository.findById(1L)).willReturn(Optional.of(event));
-        given(eventRepository.save(any(Event.class))).willReturn(event);
-
-        Event signedUpEvent = eventController.signUpToEvent(1L, 1L);
-
-        assertTrue(signedUpEvent.getVisitors().contains(user));
-        assertEquals(1, signedUpEvent.getVisitors().size());
+        assertFalse(signedUpEvent.getVisitors().contains(user));
 
         verify(eventRepository, times(1)).findById(1L);
         verify(userRepository, times(1)).findById(1L);
-        verify(userRepository, times(1)).save(any(User.class));
-        verify(eventRepository, times(1)).save(any(Event.class));
+        verify(eventRepository, times(1)).save(event);
     }
 
-    @Test
-    public void testSignOffFromEventWithSignedUpUser() {
-        HashSet<User> visitors = new HashSet<>();
-        visitors.add(user);
-        event.setVisitors(visitors);
-        HashSet<Event> events = new HashSet<>();
-        events.add(event);
-        user.setSignedUpEvents(events);
-
-        given(eventRepository.findById(1L)).willReturn(Optional.of(event));
-        given(userRepository.findById(1L)).willReturn(Optional.of(user));
-
-        Event signedOffEvent = eventController.signOffFromEvent(1L, 1L);
-
-        assertFalse(signedOffEvent.getVisitors().contains(user));
-        assertFalse(user.getSignedUpEvents().contains(event));
-
-        verify(userRepository).save(user);
-        verify(eventRepository).save(event);
-    }
 
     @Test
-    public void testSignOffFromEventWithNoSignedUpUserThrows() {
-        given(eventRepository.findById(1L)).willReturn(Optional.of(event));
-        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+    public void testSignOffFromEvent29() {
+        given(eventRepository.findById(1L)).willReturn(Optional.empty());
 
         Throwable thrown = catchThrowable(() -> eventController.signOffFromEvent(1L, 1L));
 
         assertInstanceOf(ResponseStatusException.class, thrown);
         assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) thrown).getStatusCode());
 
-        verify(userRepository, times(0)).save(user);
+        verify(eventRepository, times(1)).findById(1L);
+        verify(userRepository, times(0)).findById(1L);
+        verify(eventRepository, times(0)).save(event);
+    }
+
+
+    @Test
+    public void testSignOffFromEvent30() {
+        given(eventRepository.findById(1L)).willReturn(Optional.of(event));
+        given(userRepository.findById(1L)).willReturn(Optional.empty());
+
+        Throwable thrown = catchThrowable(() -> eventController.signOffFromEvent(1L, 1L));
+
+        assertInstanceOf(ResponseStatusException.class, thrown);
+        assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) thrown).getStatusCode());
+
+        verify(eventRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).findById(1L);
         verify(eventRepository, times(0)).save(event);
     }
 
     @Test
-    public void testSignOffFromEventWithNoSignedUpUser() {
-        User withEvents = user;
-        user.setSignedUpEvents(new HashSet<>());
+    public void testSignOffFromEvent31() {
         given(eventRepository.findById(1L)).willReturn(Optional.of(event));
-        given(userRepository.findById(1L)).willReturn(Optional.of(withEvents));
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
 
-        Event signedOffEvent = eventController.signOffFromEvent(1L, 1L);
+        Throwable thrown = catchThrowable(() -> eventController.signOffFromEvent(-1L, -1L));
 
-        assertEquals(event, signedOffEvent);
+        assertInstanceOf(ResponseStatusException.class, thrown);
+        assertEquals(HttpStatus.BAD_REQUEST, ((ResponseStatusException) thrown).getStatusCode());
 
-        verify(userRepository, times(0)).save(user);
+        verify(eventRepository, times(0)).findById(1L);
+        verify(userRepository, times(0)).findById(1L);
         verify(eventRepository, times(0)).save(event);
     }
 
     @Test
-    public void testSignOffFromEvent() {
-        User withEvents = user;
-        HashSet<Event> events = new HashSet<>();
-        events.add(event);
-        user.setSignedUpEvents(events);
+    public void testSignOffFromEvent32() {
         given(eventRepository.findById(1L)).willReturn(Optional.of(event));
-        given(userRepository.findById(1L)).willReturn(Optional.of(withEvents));
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
 
-        Event signedOffEvent = eventController.signOffFromEvent(1L, 1L);
+        Throwable thrown = catchThrowable(() -> eventController.signOffFromEvent(null, null));
 
-        assertEquals(event, signedOffEvent);
+        assertInstanceOf(ResponseStatusException.class, thrown);
+        assertEquals(HttpStatus.BAD_REQUEST, ((ResponseStatusException) thrown).getStatusCode());
 
-        verify(userRepository, times(1)).save(user);
-        verify(eventRepository, times(1)).save(event);
+        verify(eventRepository, times(0)).findById(1L);
+        verify(userRepository, times(0)).findById(1L);
+        verify(eventRepository, times(0)).save(event);
+    }
 
+
+    @Test
+    public void testSignOffFromEvent33() {
+        given(eventRepository.findById(1L)).willReturn(Optional.of(event));
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+
+        Throwable thrown = catchThrowable(() -> eventController.signOffFromEvent(1L, null));
+
+        assertInstanceOf(ResponseStatusException.class, thrown);
+        assertEquals(HttpStatus.BAD_REQUEST, ((ResponseStatusException) thrown).getStatusCode());
+
+        verify(eventRepository, times(0)).findById(1L);
+        verify(userRepository, times(0)).findById(1L);
+        verify(eventRepository, times(0)).save(event);
+    }
+
+    @Test
+    public void testSignOffFromEvent34() {
+        given(eventRepository.findById(1L)).willReturn(Optional.of(event));
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+
+        Throwable thrown = catchThrowable(() -> eventController.signOffFromEvent(1L, -1L));
+
+        assertInstanceOf(ResponseStatusException.class, thrown);
+        assertEquals(HttpStatus.BAD_REQUEST, ((ResponseStatusException) thrown).getStatusCode());
+
+        verify(eventRepository, times(0)).findById(1L);
+        verify(userRepository, times(0)).findById(1L);
+        verify(eventRepository, times(0)).save(event);
     }
 }
