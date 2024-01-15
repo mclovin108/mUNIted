@@ -253,8 +253,7 @@ class _DetailPageState extends State<Detail> {
                                   Navigator.push(
                                 context,
                                 MaterialPageRoute(builder: (context) => EditMeetingPage(_backend, _client, _meeting)),
-                              );
-                                },
+                              );},
                                 icon: Icon(Icons.edit),
                                 color:
                                     kPrimaryDarkColor,
@@ -264,7 +263,6 @@ class _DetailPageState extends State<Detail> {
                                 onPressed: () {
                                   _backend.deleteEvent(_client, _meeting.id);
                                   _showAlertDialog("Das Event wurde erfolgreich gelöscht");
-
                                 },
                                 icon: Icon(Icons.delete),
                                 color:
